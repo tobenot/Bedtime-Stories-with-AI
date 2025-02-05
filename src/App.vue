@@ -8,23 +8,14 @@
         </el-button>
       </div>
       <div class="chat-list flex-1 overflow-y-auto p-4">
-        <div
+        <ChatItem
           v-for="chat in chatHistory"
           :key="chat.id"
-          class="chat-item p-3 mb-2 rounded cursor-pointer flex items-center gap-2"
-          :class="{ 'bg-blue-100': currentChatId === chat.id }"
-          @click="switchChat(chat.id)"
-        >
-          <el-icon><ChatRound /></el-icon>
-          <span class="chat-item-title flex-1">{{ chat.title || '新对话' }}</span>
-          <el-button
-            v-if="currentChatId === chat.id"
-            type="text"
-            @click.stop="deleteChat(chat.id)"
-          >
-            <el-icon><Delete /></el-icon>
-          </el-button>
-        </div>
+          :chat="chat"
+          :active="currentChatId === chat.id"
+          @switch="switchChat"
+          @delete="deleteChat"
+        />
       </div>
     </div>
 
@@ -39,23 +30,14 @@
         </el-button>
       </div>
       <div class="chat-list flex-1 overflow-y-auto p-4">
-        <div
+        <ChatItem
           v-for="chat in chatHistory"
           :key="chat.id"
-          class="chat-item p-3 mb-2 rounded cursor-pointer flex items-center gap-2"
-          :class="{ 'bg-blue-100': currentChatId === chat.id }"
-          @click="switchChat(chat.id); showSidebar = false"
-        >
-          <el-icon><ChatRound /></el-icon>
-          <span class="chat-item-title flex-1">{{ chat.title || '新对话' }}</span>
-          <el-button
-            v-if="currentChatId === chat.id"
-            type="text"
-            @click.stop="deleteChat(chat.id)"
-          >
-            <el-icon><Delete /></el-icon>
-          </el-button>
-        </div>
+          :chat="chat"
+          :active="currentChatId === chat.id"
+          @switch="mobileSwitch"
+          @delete="deleteChat"
+        />
       </div>
     </div>
 
@@ -136,7 +118,7 @@
                       <component :is="msg.isReasoningCollapsed ? 'ArrowRight' : 'ArrowDown'" />
                     </el-icon>
                   </div>
-                  <div>思考过程：</div>
+                  <div>思考过程</div>
                   <div class="reasoning-body" :class="{ collapsed: msg.isReasoningCollapsed }">
                     {{ msg.reasoning_content }}
                   </div>
@@ -277,7 +259,13 @@
 </template>
 
 <script>
+import html2pdf from 'html2pdf.js';
+import ChatItem from './components/ChatItem.vue';
+
 export default {
+  components: {
+    ChatItem,
+  },
   data() {
     return {
       messages: [],
@@ -504,24 +492,26 @@ export default {
         tempDiv.className = 'export-content';
         
         tempDiv.innerHTML = `
-          <h1 style="margin-bottom: 10px;">${this.currentChat.title || '聊天记录'}</h1>
-          <div style="color: #666; margin-bottom: 20px;">
+          <h1 class="mb-2">${this.currentChat.title || '聊天记录'}</h1>
+          <div class="mb-5 text-customGray">
             创建时间：${new Date(this.currentChat.createdAt).toLocaleString('zh-CN')}
           </div>
         `;
         
         this.currentChat.messages.forEach(msg => {
           const messageDiv = document.createElement('div');
-          messageDiv.style.cssText = 'margin: 15px 0; padding: 15px; border: 1px solid #eee; page-break-inside: avoid;';
+          messageDiv.classList.add('my-4', 'p-4', 'border', 'border-gray-200', 'page-break-avoid');
           
           const headerDiv = document.createElement('div');
-          headerDiv.style.cssText = 'margin-bottom: 10px; display: flex; justify-content: space-between;';
+          headerDiv.classList.add('mb-2', 'flex', 'justify-between');
+          
           const roleSpan = document.createElement('span');
-          roleSpan.style.fontWeight = 'bold';
+          roleSpan.classList.add('font-bold');
           roleSpan.textContent = msg.role === 'user' ? '用户' : this.model;
           headerDiv.appendChild(roleSpan);
+          
           const timeSpan = document.createElement('span');
-          timeSpan.style.cssText = 'color: #666; font-size: 12px;';
+          timeSpan.classList.add('text-gray-600', 'text-xs');
           timeSpan.textContent = new Date(msg.timestamp).toLocaleString('zh-CN');
           headerDiv.appendChild(timeSpan);
           
@@ -529,20 +519,22 @@ export default {
           
           if (msg.role === 'assistant' && msg.reasoning_content) {
             const reasoningDiv = document.createElement('div');
-            reasoningDiv.style.cssText = 'margin: 10px 0; padding: 10px; background: #f5f5f5;';
+            reasoningDiv.classList.add('my-2', 'p-2', 'bg-reasoningBg');
+            
             const reasoningLabel = document.createElement('div');
-            reasoningLabel.style.cssText = 'font-weight: bold; margin-bottom: 5px;';
+            reasoningLabel.classList.add('font-bold', 'mb-1');
             reasoningLabel.textContent = '思考过程：';
             reasoningDiv.appendChild(reasoningLabel);
+            
             const reasoningContent = document.createElement('div');
-            reasoningContent.style.cssText = 'white-space: pre-wrap;';
+            reasoningContent.classList.add('whitespace-pre-wrap');
             reasoningContent.textContent = msg.reasoning_content;
             reasoningDiv.appendChild(reasoningContent);
             messageDiv.appendChild(reasoningDiv);
           }
           
           const contentDiv = document.createElement('div');
-          contentDiv.style.whiteSpace = 'pre-wrap';
+          contentDiv.classList.add('whitespace-pre-wrap');
           if (msg.role === 'assistant') {
             const tempElement = document.createElement('div');
             tempElement.innerHTML = this.renderMarkdown(msg.content);
@@ -623,6 +615,26 @@ export default {
         }
       }
       return text.trim();
+    },
+    confirmDelete() {
+      console.log('confirmDelete called for chat id =', this.currentChatId)
+      this.$confirm('确定删除该对话吗？', '确认删除', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          console.log('User confirmed delete')
+          this.deleteChat(this.currentChatId)
+        })
+        .catch(() => {
+          console.log('User canceled delete')
+          // 用户取消删除，不做处理
+        })
+    },
+    mobileSwitch(id) {
+      this.switchChat(id)
+      this.showSidebar = false
     }
   }
 }
