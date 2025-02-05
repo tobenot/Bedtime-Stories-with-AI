@@ -17,7 +17,7 @@
 
 项目的核心功能包括：
 - 真实流式对话体验（支持用户与 AI 聊天）
-- 展示 AI 的“思考过程”
+- 展示 AI 的"思考过程"
 - 支持 Markdown 格式的内容展示（含代码高亮）
 - 多对话管理及本地历史记录存储
 - 通过 API Key 与硅基流动 API 进行通讯
@@ -113,7 +113,7 @@ yarn serve
 ## 5. 开发注意事项
 
 - **API Key 配置**  
-  项目使用 API Key 与远端硅基流动 API 通讯。你需要在应用右上角点击“设置”按钮，然后输入你的 API Key。API Key 将安全地存储在浏览器本地存储中。
+  项目使用 API Key 与远端硅基流动 API 通讯。你需要在应用右上角点击"设置"按钮，然后输入你的 API Key。API Key 将安全地存储在浏览器本地存储中。
 
 - **组件开发**  
   - 新功能和自定义组件建议存放于 `src/components/` 目录下。  
@@ -145,6 +145,45 @@ yarn serve
            try_files $uri $uri/ /index.html;
        }
    }
+   ```
+
+## 6.1 使用 GitHub Pages 部署
+
+如果你希望将项目部署到 GitHub Pages，可以按照以下步骤操作：
+
+1. **修改 Vite 配置**  
+   确保在 `vite.config.js` 中设置正确的 `base` 路径，例如：
+   ```javascript
+   export default defineConfig({
+     base: '/Bedtime-Stories-with-AI/',
+     // 其它配置...
+   })
+   ```
+
+2. **配置部署脚本**  
+   在 `package.json` 中添加部署脚本：
+   ```json
+   "deploy": "gh-pages -d dist"
+   ```
+   同时确保安装了 `gh-pages`：
+   ```bash
+   npm install --save-dev gh-pages
+   ```
+
+3. **执行部署**  
+   先构建项目：
+   ```bash
+   npm run build
+   ```
+   然后运行部署命令：
+   ```bash
+   npm run deploy
+   ```
+
+4. **GitHub Pages 配置**  
+   在 GitHub 仓库的 **Settings > Pages** 中，将**Source**（来源）设置为 `gh-pages` 分支。几分钟后，即可通过以下 URL 访问应用：
+   ```
+   https://<你的用户名>.github.io/Bedtime-Stories-with-AI/
    ```
 
 ---
