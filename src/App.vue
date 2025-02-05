@@ -1,13 +1,13 @@
 <template>
-  <div class="app-container flex h-screen bg-gray-100">
+  <div class="app-container flex h-screen">
     <!-- 桌面版侧边栏 -->
-    <div class="sidebar w-64 bg-white border-r hidden md:flex flex-col">
+    <div class="sidebar w-64 hidden md:flex flex-col custom-scrollbar">
       <div class="sidebar-header p-4 border-b">
-        <el-button type="primary" class="w-full" @click="createNewChat">
+        <el-button class="btn-primary w-full" @click="createNewChat">
           <el-icon><Plus /></el-icon> 新对话
         </el-button>
       </div>
-      <div class="chat-list flex-1 overflow-y-auto p-4">
+      <div class="chat-list flex-1 overflow-y-auto p-4 custom-scrollbar">
         <ChatItem
           v-for="chat in chatHistory"
           :key="chat.id"
@@ -25,7 +25,7 @@
       v-if="showSidebar"
     >
       <div class="sidebar-header p-4 border-b">
-        <el-button type="primary" class="w-full" @click="createNewChat">
+        <el-button class="btn-primary w-full" @click="createNewChat">
           <el-icon><Plus /></el-icon> 新对话
         </el-button>
       </div>
@@ -51,35 +51,34 @@
     <!-- 主内容区 -->
     <div class="main-content flex-1 flex flex-col">
       <!-- 共用头部：无论桌面还是移动端都显示 -->
-      <div class="header sticky top-0 z-50 flex items-center justify-between p-4 bg-white border-b">
+      <div class="header sticky top-0 z-50 flex items-center justify-between p-4 bg-primary text-white border-b border-primary-light">
         <!-- 仅移动端显示菜单按钮 -->
-        <button class="menu-button md:hidden" @click="showSidebar = true">
+        <button class="menu-button md:hidden text-white" @click="showSidebar = true">
           <el-icon><Expand /></el-icon>
         </button>
         <div class="flex items-center gap-2">
-          <img src="./logo.svg" alt="Logo" class="w-6 h-6">
-          <h2 class="text-lg">与AI的睡前故事</h2>
+          <h2 class="text-lg text-white font-medium">{{ currentChat?.title || '与AI的睡前故事' }}</h2>
         </div>
         <div class="header-actions flex items-center gap-2">
-          <el-button type="text" @click="exportToPDF" :disabled="!currentChat?.messages?.length">
+          <el-button class="btn-secondary text-white border-white hover:bg-white/10" @click="exportToPDF" :disabled="!currentChat?.messages?.length">
             <el-icon><Download /></el-icon>
           </el-button>
-          <el-button type="text" @click="showSettings = true">
+          <el-button class="btn-secondary text-white border-white hover:bg-white/10" @click="showSettings = true">
             <el-icon><Setting /></el-icon>
           </el-button>
         </div>
       </div>
 
-      <el-main class="message-list flex-1 overflow-y-auto p-5 mt-16 md:mt-0">
+      <el-main class="message-list flex-1 overflow-y-auto p-5 mt-16 md:mt-0 custom-scrollbar">
         <template v-if="!apiKey">
           <div class="empty-state text-center p-5">
             <el-alert type="info" :closable="false" show-icon>
               <template #title>
-                <div class="text-lg font-semibold text-gray-800">请先设置API Key</div>
+                <div class="text-lg font-semibold text-primary">请先设置API Key</div>
               </template>
               <template #default>
-                <div class="text-gray-600">
-                  请前往 <a href="https://cloud.siliconflow.cn/i/FuAPK085" target="_blank" class="text-blue-500 underline">硅基流动</a> 获取您的 API Key，新注册用户有14元免费额度。
+                <div class="text-base text-customGray">
+                  请前往 <a href="https://cloud.siliconflow.cn/i/FuAPK085" target="_blank" class="text-secondary underline">硅基流动</a> 获取您的 API Key，新注册用户有14元免费额度。
                   <br>
                   点击右上角
                   <el-button type="text" class="inline-block text-blue-500 p-0" @click="showSettings = true">
@@ -96,8 +95,8 @@
             <div class="empty-state-icon mb-4">
               <img src="./logo.svg" alt="Logo" class="w-12 h-12 inline-block" />
             </div>
-            <h3 class="empty-state-title text-2xl font-semibold text-gray-800 mb-2">开始新的对话</h3>
-            <p class="empty-state-description text-gray-600 mb-4">
+            <h3 class="empty-state-title text-2xl font-semibold text-primary mb-2">开始新的对话</h3>
+            <p class="empty-state-description text-base text-customGray mb-4">
               我是您的 AI 助手，可以帮助您解答问题、编写代码、分析数据等。让我们开始对话吧！
             </p>
             <el-button type="primary" @click="focusInput">开始对话</el-button>
@@ -137,10 +136,11 @@
         </template>
       </el-main>
 
-      <div class="input-footer p-4 bg-white border-t">
+      <div class="input-footer p-4 glass-effect border-t border-secondary/20">
         <el-row :gutter="10">
           <el-col :span="20">
             <el-input
+              class="input-area"
               ref="messageInput"
               v-model="inputMessage"
               type="textarea"
@@ -148,13 +148,11 @@
               :disabled="!apiKey"
               placeholder="输入你的消息..."
               @keyup.enter="sendMessage"
-              class="w-full"
             ></el-input>
           </el-col>
           <el-col :span="4">
             <el-button
-              type="primary"
-              class="w-full h-full"
+              class="btn-primary w-full h-full"
               :loading="isLoading"
               :disabled="!apiKey"
               @click="sendMessage"
@@ -181,6 +179,7 @@
     direction="rtl"
     size="80%"
     :destroy-on-close="false"
+    class="settings-drawer"
   >
     <div class="settings-drawer p-4">
       <el-form>
@@ -214,7 +213,7 @@
 
   <!-- Footer -->
   <div class="footer p-4 bg-white border-t text-center text-gray-600 text-sm">
-    本项目作者: <a href="https://tobenot.top/" target="_blank" class="text-blue-500 hover:underline">tobenot</a> &amp; © 2025 DeepSeek伴侣 框架作者: <a href="https://www.huasheng.ai" target="_blank" class="text-blue-500 hover:underline">花生</a>
+    本项目作者: <a href="https://tobenot.top/" target="_blank" class="text-secondary hover:underline">tobenot</a> &amp; © 2025 DeepSeek伴侣 框架作者: <a href="https://www.huasheng.ai" target="_blank" class="text-secondary hover:underline">花生</a>
     <el-button type="text" @click="showAuthorInfo = true" class="ml-2">
       <el-icon><InfoFilled /></el-icon>
     </el-button>
@@ -367,7 +366,7 @@ export default {
     },
     updateChatTitle(message) {
       if (!this.currentChat.title || this.currentChat.title === '新对话') {
-        this.currentChat.title = message.slice(0, 20) + (message.length > 20 ? '...' : '')
+        this.currentChat.title = message.slice(0, 10) + (message.length > 10 ? '...' : '')
         this.saveChatHistory()
       }
     },

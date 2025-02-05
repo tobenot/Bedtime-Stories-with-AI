@@ -5,6 +5,115 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 自定义基础样式 */
+@layer base {
+  body {
+    @apply bg-gray-50;
+  }
+}
+
+/* 自定义组件样式 */
+@layer components {
+  /* 应用容器样式 */
+  .app-container {
+    @apply bg-gray-50;
+  }
+
+  /* 侧边栏样式 */
+  .sidebar {
+    @apply bg-white shadow-sm border-r border-gray-200;
+  }
+
+  /* 消息气泡基础样式 */
+  .message-bubble {
+    @apply p-4 rounded-lg shadow-sm transition-all duration-200;
+    max-width: 85%;
+  }
+
+  /* 用户消息气泡 */
+  .user-message {
+    @apply bg-primary/10 self-end border border-primary/20 text-primary;
+  }
+
+  /* AI消息气泡 */
+  .assistant-message {
+    @apply bg-white self-start border border-gray-200 text-gray-800;
+  }
+
+  /* 思考过程样式 */
+  .reasoning-content {
+    @apply p-3 my-2 rounded-md bg-reasoningBg border-l-4 border-secondary/30;
+  }
+
+  /* 主要按钮样式 */
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-light text-white transition-colors duration-200
+           rounded-md px-4 py-2 flex items-center gap-2;
+  }
+
+  /* 次要按钮样式 */
+  .btn-secondary {
+    @apply bg-transparent border border-secondary text-secondary hover:bg-secondary/5 transition-colors duration-200 rounded-md px-4 py-2;
+  }
+
+  /* 输入框样式 */
+  .input-area {
+    @apply bg-white border border-gray-300 rounded-lg
+           focus-within:border-secondary focus-within:ring-1 focus-within:ring-secondary/30
+           transition-all duration-200;
+  }
+
+  /* 设置抽屉样式 */
+  .settings-drawer {
+    @apply bg-white;
+  }
+}
+
+/* 自定义工具类 */
+@layer utilities {
+  /* 滚动条样式 */
+  .custom-scrollbar {
+    @apply overflow-auto;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-secondary/20 rounded-full hover:bg-secondary/30;
+  }
+
+  /* 渐变背景 */
+  .gradient-bg {
+    @apply bg-gradient-to-br from-primary/5 to-secondary/5;
+  }
+
+  /* 毛玻璃效果 */
+  .glass-effect {
+    @apply bg-white/80 backdrop-blur-sm;
+  }
+}
+
+/* 动画相关样式 */
+.typing-indicator {
+  @apply flex items-center space-x-1.5;
+}
+
+.typing-indicator .dot {
+  @apply w-2 h-2 rounded-full bg-secondary/60;
+  animation: blink 1.4s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
 /* 自定义工具类：用于避免页面分割时中断元素内容 */
 .page-break-avoid {
   page-break-inside: avoid;
@@ -12,64 +121,13 @@
 
 /* 自定义样式可以在这里添加 */
 
-/* 例如，将原来的 color-palette.css 中的变量转换为 Tailwind 配色 */
-:root {
-  --primary-color: #1E3A5F;      /* 深蓝色 */
-  --secondary-color: #4A90E2;    /* 较淡蓝色 */
-  --accent-purple: #9B59B6;      /* 紫色 */
-  --accent-silver: #BDC3C7;      /* 银色 */
-  --highlight-yellow: #F1C40F;   /* 黄色 */
-}
-
-/* 如果需要，可以在这里添加自定义 CSS */
-
 /* 优化主消息列表展示格式样式 */
 .message-list {
   @apply flex flex-col gap-4;
-}
-
-.message-bubble {
-  @apply p-4 rounded-lg shadow;
-  max-width: 75%;
-  word-wrap: break-word;
-  line-height: 1.6;
-}
-
-.user-message {
-  @apply bg-white self-end;
-}
-
-.assistant-message {
-  @apply bg-white self-start;
 }
 
 /* 优化 Markdown 内容展示 */
 .markdown-content {
   line-height: 1.8;
   font-size: 0.95rem;
-}
-
-/* 优化"思考过程"展示（应用于 assistant 消息带有 reasoning_content 时） */
-.reasoning-content {
-  @apply p-2 border-l-4 border-blue-300 bg-blue-50 rounded;
-  margin-bottom: 1rem;
-}
-.reasoning-content .reasoning-toggle {
-  cursor: pointer;
-}
-
-/* 打字指示器样式 */
-.typing-indicator {
-  @apply flex items-center space-x-1;
-}
-.typing-indicator .dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  background-color: #333;
-  border-radius: 50%;
-  animation: blink 1s infinite;
-}
-@keyframes blink {
-  0%, 80%, 100% { opacity: 0.2; }
-  40% { opacity: 1; }
 } 
