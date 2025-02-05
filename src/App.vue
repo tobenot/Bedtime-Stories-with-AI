@@ -4,7 +4,7 @@
     <div class="sidebar w-64 hidden md:flex flex-col custom-scrollbar">
       <div class="sidebar-header p-4 border-b">
         <el-button class="btn-primary w-full" @click="createNewChat">
-          <el-icon><Plus /></el-icon> 新对话
+          <el-icon><Plus /></el-icon> 新故事
         </el-button>
       </div>
       <div class="chat-list flex-1 overflow-y-auto p-4 custom-scrollbar">
@@ -26,7 +26,7 @@
     >
       <div class="sidebar-header p-4 border-b">
         <el-button class="btn-primary w-full" @click="createNewChat">
-          <el-icon><Plus /></el-icon> 新对话
+          <el-icon><Plus /></el-icon> 新故事
         </el-button>
       </div>
       <div class="chat-list flex-1 overflow-y-auto p-4">
@@ -95,11 +95,12 @@
             <div class="empty-state-icon mb-4">
               <img src="./logo.svg" alt="Logo" class="w-12 h-12 inline-block" />
             </div>
-            <h3 class="empty-state-title text-2xl font-semibold text-primary mb-2">开始新的对话</h3>
+            <h3 class="empty-state-title text-2xl font-semibold text-primary mb-2">开始新的故事</h3>
             <p class="empty-state-description text-base text-customGray mb-4">
-              我是您的 AI 助手，可以帮助您解答问题、编写代码、分析数据等。让我们开始对话吧！
+              选择剧本，或者自己在下方输入框输入你想要的故事开头！
             </p>
-            <el-button type="primary" @click="focusInput">开始对话</el-button>
+            <el-button type="primary" @click="focusInput">手动输入</el-button>
+            <el-button type="primary" @click="openScriptPanel" class="ml-2">选择剧本</el-button>
           </div>
         </template>
         <template v-else>
@@ -278,15 +279,21 @@
       </el-tab-pane>
     </el-tabs>
   </el-dialog>
+
+  <!-- 引入剧本选择组件 -->
+  <ScriptSelector v-model="showScriptPanel" :scripts="scripts" @script-selected="selectScript" />
 </template>
 
 <script>
 import html2pdf from 'html2pdf.js';
 import ChatItem from './components/ChatItem.vue';
+import ScriptSelector from './components/ScriptSelector.vue';
+import scripts from './config/scripts.js';
 
 export default {
   components: {
     ChatItem,
+    ScriptSelector,
   },
   data() {
     return {
@@ -306,7 +313,9 @@ export default {
       showSidebar: false,
       chatHistory: [],
       currentChatId: null,
-      showAuthorInfo: false
+      showAuthorInfo: false,
+      showScriptPanel: false,
+      scripts: scripts
     }
   },
   computed: {
@@ -333,7 +342,7 @@ export default {
     createNewChat() {
       const newChat = {
         id: Date.now(),
-        title: '新对话',
+        title: '新故事',
         messages: [],
         createdAt: new Date().toISOString()
       }
@@ -365,7 +374,7 @@ export default {
       this.$refs.messageInput.focus()
     },
     updateChatTitle(message) {
-      if (!this.currentChat.title || this.currentChat.title === '新对话') {
+      if (!this.currentChat.title || this.currentChat.title === '新故事') {
         this.currentChat.title = message.slice(0, 10) + (message.length > 10 ? '...' : '')
         this.saveChatHistory()
       }
@@ -657,6 +666,15 @@ export default {
     mobileSwitch(id) {
       this.switchChat(id)
       this.showSidebar = false
+    },
+    openScriptPanel() {
+      console.log('[App] openScriptPanel clicked, setting showScriptPanel to true');
+      this.showScriptPanel = true;
+    },
+    selectScript(script) {
+      console.log('[App] script selected:', script);
+      this.inputMessage = script.content;
+      this.focusInput();
     }
   }
 }
