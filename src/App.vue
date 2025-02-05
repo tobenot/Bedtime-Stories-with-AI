@@ -79,7 +79,7 @@
               </template>
               <template #default>
                 <div class="text-base text-customGray">
-                  请前往 <a href="https://cloud.siliconflow.cn/i/M9KJQRfy" target="_blank" class="text-secondary underline">硅基流动(本项目作者邀请码)</a><br> 或 <a href="https://cloud.siliconflow.cn/i/FuAPK085" target="_blank" class="text-secondary underline">硅基流动(父项目作者邀请码)<br></a> 注册账号，获取您的 API Key<br>通过任一邀请码注册的新注册用户有14元免费额度。
+                  请前往 <a href="https://cloud.siliconflow.cn/i/M9KJQRfy" target="_blank" class="text-secondary underline">硅基流动(本项目邀请码)</a><br> 或 <a href="https://cloud.siliconflow.cn/i/FuAPK085" target="_blank" class="text-secondary underline">(父项目邀请码)<br></a> 注册账号，获取您的 API Key<br>通过任一邀请码注册的新注册用户有14元免费额度。
                   <br>
                   点击右上角
                   <el-button type="text" class="inline-block text-blue-500 p-0" @click="showSettings = true">
@@ -217,10 +217,10 @@
 
   <!-- Footer -->
   <div class="footer p-4 bg-white border-t text-center text-gray-600 text-sm">
-    本项目作者: <a href="https://tobenot.top/" target="_blank" class="text-secondary hover:underline">tobenot</a> &amp; © 2025 DeepSeek伴侣 框架作者: <a href="https://www.huasheng.ai" target="_blank" class="text-secondary hover:underline">花生</a>
     <el-button type="text" @click="showAuthorInfo = true" class="ml-2">
       <el-icon><InfoFilled /></el-icon>
     </el-button>
+    作者: <a href="https://tobenot.top/" target="_blank" class="text-secondary hover:underline">tobenot</a> &amp; © 2025 父项目作者: <a href="https://www.huasheng.ai" target="_blank" class="text-secondary hover:underline">花生</a>
   </div>
 
   <!-- 作者信息弹窗 -->
@@ -251,7 +251,7 @@
           </div>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="框架作者">
+      <el-tab-pane label="父项目作者">
         <div class="author-info p-4">
           <h3 class="text-lg font-semibold">花生 (AI进化论-花生)</h3>
           <div class="author-desc text-gray-600 mt-2">

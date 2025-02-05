@@ -9,6 +9,7 @@
 @layer base {
   body {
     @apply bg-gray-50;
+    font-family: 'Source Han Sans', '思源黑体', sans-serif;
   }
 }
 
@@ -130,4 +131,9 @@
 .markdown-content {
   line-height: 1.8;
   font-size: 0.95rem;
+}
+
+/* 新增全局字体覆盖，确保所有组件均使用游戏风格字体 */
+* {
+  font-family: 'Source Han Sans', '思源黑体', sans-serif !important;
 } 
