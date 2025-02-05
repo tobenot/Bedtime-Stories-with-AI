@@ -21,9 +21,10 @@
 
     <!-- 移动端侧边栏 -->
     <div
-      class="sidebar fixed left-0 w-64 bg-white border-r flex flex-col md:hidden z-50 top-16 bottom-0"
+      class="sidebar fixed left-0 w-64 bg-gray-50 border-r flex flex-col md:hidden z-50 top-16 bottom-0"
       v-if="showSidebar"
     >
+      <!-- 侧边栏内容保持不变 -->
       <div class="sidebar-header p-4 border-b">
         <el-button class="btn-primary w-full" @click="createNewChat">
           <el-icon><Plus /></el-icon> 新故事
@@ -78,7 +79,7 @@
               </template>
               <template #default>
                 <div class="text-base text-customGray">
-                  请前往 <a href="https://cloud.siliconflow.cn/i/FuAPK085" target="_blank" class="text-secondary underline">硅基流动</a> 获取您的 API Key，新注册用户有14元免费额度。
+                  请前往 <a href="https://cloud.siliconflow.cn/i/M9KJQRfy" target="_blank" class="text-secondary underline">硅基流动(本项目作者邀请码)</a><br> 或 <a href="https://cloud.siliconflow.cn/i/FuAPK085" target="_blank" class="text-secondary underline">硅基流动(父项目作者邀请码)<br></a> 注册账号，获取您的 API Key<br>通过任一邀请码注册的新注册用户有14元免费额度。
                   <br>
                   点击右上角
                   <el-button type="text" class="inline-block text-blue-500 p-0" @click="showSettings = true">
@@ -112,13 +113,15 @@
             <div v-if="msg.role === 'user'">{{ msg.content }}</div>
             <template v-else>
               <template v-if="msg.reasoning_content">
-                <div class="reasoning-content">
-                  <div class="reasoning-toggle" @click="toggleReasoning(index)">
-                    <el-icon>
-                      <component :is="msg.isReasoningCollapsed ? 'ArrowRight' : 'ArrowDown'" />
-                    </el-icon>
+                <div class="reasoning-content bg-reasoningBg text-white p-2 rounded mb-2">
+                  <div class="flex items-center mb-1">
+                    <div class="reasoning-toggle cursor-pointer mr-2" @click="toggleReasoning(index)">
+                      <el-icon>
+                        <component :is="msg.isReasoningCollapsed ? 'ArrowRight' : 'ArrowDown'" />
+                      </el-icon>
+                    </div>
+                    <span class="font-bold">思考过程</span>
                   </div>
-                  <div>思考过程</div>
                   <div class="reasoning-body" :class="{ collapsed: msg.isReasoningCollapsed }">
                     {{ msg.reasoning_content }}
                   </div>
@@ -550,7 +553,7 @@ export default {
           
           if (msg.role === 'assistant' && msg.reasoning_content) {
             const reasoningDiv = document.createElement('div');
-            reasoningDiv.classList.add('my-2', 'p-2', 'bg-reasoningBg');
+            reasoningDiv.classList.add('my-2', 'p-2', 'bg-reasoningBg', 'text-white');
             
             const reasoningLabel = document.createElement('div');
             reasoningLabel.classList.add('font-bold', 'mb-1');
@@ -585,7 +588,7 @@ export default {
           html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-
+  
         document.body.appendChild(tempDiv);
         
         try {

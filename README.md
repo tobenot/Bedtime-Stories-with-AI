@@ -12,7 +12,7 @@
 
 ## 开始使用
 
-1. 访问 [硅基流动(本项目作者邀请码)](https://cloud.siliconflow.cn/i/M9KJQRfy) 或 [硅基流动(框架作者邀请码)](https://cloud.siliconflow.cn/i/M9KJQRfy) 注册账号  
+1. 访问 [硅基流动(本项目作者邀请码)](https://cloud.siliconflow.cn/i/M9KJQRfy) 或 [硅基流动(框架作者邀请码)](https://cloud.siliconflow.cn/i/FuAPK085) 注册账号  
 2. 获取免费的 API Key
 3. 打开 “与AI的睡前故事” 网页  
 4. 配置 API Key 开始对话  

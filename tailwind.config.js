@@ -5,21 +5,28 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#1E3A5F',
-          light: '#2C5693',
+          DEFAULT: '#4A5568', // 深蓝灰色,更适合夜间阅读
+          light: '#718096',   // 较浅的蓝灰色
+          dark: '#2D3748',    // 深色调
         },
         secondary: {
-          DEFAULT: '#4A90E2',
-          light: '#6BA4E9',
+          DEFAULT: '#805AD5', // 梦幻紫色
+          light: '#B794F4',   // 浅紫色
+          dark: '#553C9A',    // 深紫色
         },
         accent: {
-          purple: '#9B59B6',
-          silver: '#BDC3C7',
+          purple: '#9F7AEA', // 柔和的紫色
+          silver: '#A0AEC0', // 月光银
         },
-        highlight: '#F1C40F',
-        customGray: '#666666',       // 用于替代 inline 的 #666
-        reasoningBg: '#f5f5f5',      // 用于 reasoning 背景
-        // 可根据需要添加更多自定义颜色
+        highlight: '#F6AD55', // 温暖的橙色
+        customGray: '#718096', // 柔和的灰色
+        reasoningBg: '#2D3748', // 深色背景
+        fantasy: {
+          DEFAULT: '#B794F4', // 梦幻色
+          starlight: '#EDF2F7', // 星光色
+          midnight: '#1A202C', // 午夜色
+          dream: '#D6BCFA',   // 梦境色
+        }
       },
       opacity: {
         '5': '0.05',

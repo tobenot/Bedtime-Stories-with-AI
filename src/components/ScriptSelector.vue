@@ -22,7 +22,7 @@
           <span
             v-for="tag in script.tags"
             :key="tag"
-            class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded"
+            class="text-xs bg-secondary/10 text-secondary px-2 py-1 rounded"
           >
             {{ tag }}
           </span>
