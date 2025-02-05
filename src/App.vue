@@ -58,7 +58,7 @@
         </button>
         <div class="flex items-center gap-2">
           <img src="./logo.svg" alt="Logo" class="w-6 h-6">
-          <h2 class="text-lg">DeepSeek伴侣</h2>
+          <h2 class="text-lg">与AI的睡前故事</h2>
         </div>
         <div class="header-actions flex items-center gap-2">
           <el-button type="text" @click="exportToPDF" :disabled="!currentChat?.messages?.length">
@@ -214,7 +214,7 @@
 
   <!-- Footer -->
   <div class="footer p-4 bg-white border-t text-center text-gray-600 text-sm">
-    © 2025 DeepSeek伴侣 | by <a href="https://www.huasheng.ai" target="_blank" class="text-blue-500 hover:underline">AI进化论-花生</a>
+    本项目作者: <a href="https://tobenot.top/" target="_blank" class="text-blue-500 hover:underline">tobenot</a> &amp; © 2025 DeepSeek伴侣 框架作者: <a href="https://www.huasheng.ai" target="_blank" class="text-blue-500 hover:underline">花生</a>
     <el-button type="text" @click="showAuthorInfo = true" class="ml-2">
       <el-icon><InfoFilled /></el-icon>
     </el-button>
@@ -228,33 +228,56 @@
     :max-width="500"
     class="author-dialog"
   >
-    <div class="author-info p-4">
-      <h3 class="text-lg font-semibold">花生 (AI进化论-花生)</h3>
-      <div class="author-desc text-gray-600 mt-2">
-        <p>AI Native Coder｜第一代不会写代码的独立开发者</p>
-        <p>AppStore 付费榜 Top1「小猫补光灯」开发者</p>
-        <p>10万+粉AI博主</p>
-        <p>微软｜LinkedIn AI课程讲师</p>
-        <p>全球旅居中...66%的数字游民</p>
-      </div>
-      <div class="social-links grid grid-cols-2 gap-3 mt-4">
-        <a href="https://www.youtube.com/@alchain" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
-          <el-icon><VideoCamera /></el-icon> YouTube
-        </a>
-        <a href="https://space.bilibili.com/14097567" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
-          <el-icon><VideoPlay /></el-icon> Bilibili
-        </a>
-        <a href="https://www.xiaohongshu.com/user/profile/5abc6f17e8ac2b109179dfdf" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
-          <el-icon><Picture /></el-icon> 小红书
-        </a>
-        <a href="https://x.com/AlchainHust" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
-          <el-icon><Message /></el-icon> Twitter
-        </a>
-        <div class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded">
-          <el-icon><ChatDotRound /></el-icon> 微信公众号：花叔
+    <el-tabs type="card">
+      <el-tab-pane label="本项目作者">
+        <div class="author-info p-4">
+          <h3 class="text-lg font-semibold">tobenot (丶青萝卜)</h3>
+          <div class="author-desc text-gray-600 mt-2">
+            <p>AI动漫，AI剧本杀，AI文明，反正都不火</p>
+            <p>5个Steam独游，反正都不火</p>
+            <p>晚上喜欢和AI玩剧本杀所以就做了这个</p>
+            <p>在做AI开放世界</p>
+          </div>
+          <div class="social-links grid grid-cols-2 gap-3 mt-4">
+            <a href="https://space.bilibili.com/23122362/" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
+              <el-icon><VideoPlay /></el-icon> Bilibili
+            </a>
+            <a href="https://www.xiaohongshu.com/user/profile/5c03942800000000050142ab" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
+              <el-icon><Picture /></el-icon> 小红书
+            </a>
+          </div>
         </div>
-      </div>
-    </div>
+      </el-tab-pane>
+      <el-tab-pane label="框架作者">
+        <div class="author-info p-4">
+          <h3 class="text-lg font-semibold">花生 (AI进化论-花生)</h3>
+          <div class="author-desc text-gray-600 mt-2">
+            <p>AI Native Coder｜第一代不会写代码的独立开发者</p>
+            <p>AppStore 付费榜 Top1「小猫补光灯」开发者</p>
+            <p>10万+粉AI博主</p>
+            <p>微软｜LinkedIn AI课程讲师</p>
+            <p>全球旅居中...66%的数字游民</p>
+          </div>
+          <div class="social-links grid grid-cols-2 gap-3 mt-4">
+            <a href="https://www.youtube.com/@alchain" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
+              <el-icon><VideoCamera /></el-icon> YouTube
+            </a>
+            <a href="https://space.bilibili.com/14097567" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
+              <el-icon><VideoPlay /></el-icon> Bilibili
+            </a>
+            <a href="https://www.xiaohongshu.com/user/profile/5abc6f17e8ac2b109179dfdf" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
+              <el-icon><Picture /></el-icon> 小红书
+            </a>
+            <a href="https://x.com/AlchainHust" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
+              <el-icon><Message /></el-icon> Twitter
+            </a>
+            <div class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded">
+              <el-icon><ChatDotRound /></el-icon> 微信公众号：花叔
+            </div>
+          </div>
+        </div>
+      </el-tab-pane>
+    </el-tabs>
   </el-dialog>
 </template>
 
