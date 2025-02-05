@@ -21,7 +21,7 @@
 
     <!-- 移动端侧边栏 -->
     <div
-      class="sidebar fixed inset-y-0 left-0 w-64 bg-white border-r flex flex-col md:hidden z-50"
+      class="sidebar fixed left-0 w-64 bg-white border-r flex flex-col md:hidden z-50 top-16 bottom-0"
       v-if="showSidebar"
     >
       <div class="sidebar-header p-4 border-b">
