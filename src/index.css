@@ -1,0 +1,19 @@
+/* 如果有 @charset，可以放在最顶部，否则直接放置 @import */
+@import 'highlight.js/styles/github.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 自定义样式可以在这里添加 */
+
+/* 例如，将原来的 color-palette.css 中的变量转换为 Tailwind 配色 */
+:root {
+  --primary-color: #1E3A5F;      /* 深蓝色 */
+  --secondary-color: #4A90E2;    /* 较淡蓝色 */
+  --accent-purple: #9B59B6;      /* 紫色 */
+  --accent-silver: #BDC3C7;      /* 银色 */
+  --highlight-yellow: #F1C40F;   /* 黄色 */
+}
+
+/* 如果需要，可以在这里添加自定义 CSS */ 

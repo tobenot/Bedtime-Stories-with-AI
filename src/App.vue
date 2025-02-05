@@ -1,0 +1,638 @@
+<template>
+  <div class="app-container flex h-screen bg-gray-100">
+    <!-- 桌面版侧边栏 -->
+    <div class="sidebar w-64 bg-white border-r hidden md:flex flex-col">
+      <div class="sidebar-header p-4 border-b">
+        <el-button type="primary" class="w-full" @click="createNewChat">
+          <el-icon><Plus /></el-icon> 新对话
+        </el-button>
+      </div>
+      <div class="chat-list flex-1 overflow-y-auto p-4">
+        <div
+          v-for="chat in chatHistory"
+          :key="chat.id"
+          class="chat-item p-3 mb-2 rounded cursor-pointer flex items-center gap-2"
+          :class="{ 'bg-blue-100': currentChatId === chat.id }"
+          @click="switchChat(chat.id)"
+        >
+          <el-icon><ChatRound /></el-icon>
+          <span class="chat-item-title flex-1">{{ chat.title || '新对话' }}</span>
+          <el-button
+            v-if="currentChatId === chat.id"
+            type="text"
+            @click.stop="deleteChat(chat.id)"
+          >
+            <el-icon><Delete /></el-icon>
+          </el-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 移动端侧边栏 -->
+    <div
+      class="sidebar fixed inset-y-0 left-0 w-64 bg-white border-r flex flex-col md:hidden z-50"
+      v-if="showSidebar"
+    >
+      <div class="sidebar-header p-4 border-b">
+        <el-button type="primary" class="w-full" @click="createNewChat">
+          <el-icon><Plus /></el-icon> 新对话
+        </el-button>
+      </div>
+      <div class="chat-list flex-1 overflow-y-auto p-4">
+        <div
+          v-for="chat in chatHistory"
+          :key="chat.id"
+          class="chat-item p-3 mb-2 rounded cursor-pointer flex items-center gap-2"
+          :class="{ 'bg-blue-100': currentChatId === chat.id }"
+          @click="switchChat(chat.id); showSidebar = false"
+        >
+          <el-icon><ChatRound /></el-icon>
+          <span class="chat-item-title flex-1">{{ chat.title || '新对话' }}</span>
+          <el-button
+            v-if="currentChatId === chat.id"
+            type="text"
+            @click.stop="deleteChat(chat.id)"
+          >
+            <el-icon><Delete /></el-icon>
+          </el-button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 移动端侧边栏遮罩 -->
+    <div
+      class="sidebar-overlay fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+      v-if="showSidebar"
+      @click="showSidebar = false"
+    ></div>
+
+    <!-- 主内容区 -->
+    <div class="main-content flex-1 flex flex-col">
+      <!-- 共用头部：无论桌面还是移动端都显示 -->
+      <div class="header sticky top-0 z-50 flex items-center justify-between p-4 bg-white border-b">
+        <!-- 仅移动端显示菜单按钮 -->
+        <button class="menu-button md:hidden" @click="showSidebar = true">
+          <el-icon><Expand /></el-icon>
+        </button>
+        <div class="flex items-center gap-2">
+          <img src="./logo.svg" alt="Logo" class="w-6 h-6">
+          <h2 class="text-lg">DeepSeek伴侣</h2>
+        </div>
+        <div class="header-actions flex items-center gap-2">
+          <el-button type="text" @click="exportToPDF" :disabled="!currentChat?.messages?.length">
+            <el-icon><Download /></el-icon>
+          </el-button>
+          <el-button type="text" @click="showSettings = true">
+            <el-icon><Setting /></el-icon>
+          </el-button>
+        </div>
+      </div>
+
+      <el-main class="message-list flex-1 overflow-y-auto p-5 mt-16 md:mt-0">
+        <template v-if="!apiKey">
+          <div class="empty-state text-center p-5">
+            <el-alert type="info" :closable="false" show-icon>
+              <template #title>
+                <div class="text-lg font-semibold text-gray-800">请先设置API Key</div>
+              </template>
+              <template #default>
+                <div class="text-gray-600">
+                  请前往 <a href="https://cloud.siliconflow.cn/i/FuAPK085" target="_blank" class="text-blue-500 underline">硅基流动</a> 获取您的 API Key，新注册用户有14元免费额度。
+                  <br>
+                  点击右上角
+                  <el-button type="text" class="inline-block text-blue-500 p-0" @click="showSettings = true">
+                    <el-icon><Setting /></el-icon> 设置
+                  </el-button>
+                  按钮配置您的API Key
+                </div>
+              </template>
+            </el-alert>
+          </div>
+        </template>
+        <template v-else-if="!currentChat?.messages?.length">
+          <div class="empty-state text-center p-5">
+            <div class="empty-state-icon mb-4">
+              <img src="./logo.svg" alt="Logo" class="w-12 h-12 inline-block" />
+            </div>
+            <h3 class="empty-state-title text-2xl font-semibold text-gray-800 mb-2">开始新的对话</h3>
+            <p class="empty-state-description text-gray-600 mb-4">
+              我是您的 AI 助手，可以帮助您解答问题、编写代码、分析数据等。让我们开始对话吧！
+            </p>
+            <el-button type="primary" @click="focusInput">开始对话</el-button>
+          </div>
+        </template>
+        <template v-else>
+          <div 
+            v-for="(msg, index) in currentChat.messages" 
+            :key="index" 
+            class="message-bubble" 
+            :class="msg.role === 'user' ? 'user-message' : 'assistant-message'">
+            <div v-if="msg.role === 'user'">{{ msg.content }}</div>
+            <template v-else>
+              <template v-if="msg.reasoning_content">
+                <div class="reasoning-content">
+                  <div class="reasoning-toggle" @click="toggleReasoning(index)">
+                    <el-icon>
+                      <component :is="msg.isReasoningCollapsed ? 'ArrowRight' : 'ArrowDown'" />
+                    </el-icon>
+                  </div>
+                  <div>思考过程：</div>
+                  <div class="reasoning-body" :class="{ collapsed: msg.isReasoningCollapsed }">
+                    {{ msg.reasoning_content }}
+                  </div>
+                </div>
+              </template>
+              <div class="markdown-content" v-html="renderMarkdown(msg.content)"></div>
+            </template>
+          </div>
+          <div v-if="isTyping" class="message-bubble assistant-message">
+            <div class="typing-indicator">
+              <div class="dot" style="animation-delay: 0s"></div>
+              <div class="dot" style="animation-delay: 0.2s"></div>
+              <div class="dot" style="animation-delay: 0.4s"></div>
+            </div>
+          </div>
+        </template>
+      </el-main>
+
+      <div class="input-footer p-4 bg-white border-t">
+        <el-row :gutter="10">
+          <el-col :span="20">
+            <el-input
+              ref="messageInput"
+              v-model="inputMessage"
+              type="textarea"
+              :rows="2"
+              :disabled="!apiKey"
+              placeholder="输入你的消息..."
+              @keyup.enter="sendMessage"
+              class="w-full"
+            ></el-input>
+          </el-col>
+          <el-col :span="4">
+            <el-button
+              type="primary"
+              class="w-full h-full"
+              :loading="isLoading"
+              :disabled="!apiKey"
+              @click="sendMessage"
+            >
+              发送
+            </el-button>
+          </el-col>
+        </el-row>
+        <el-alert
+          v-if="errorMessage"
+          :title="errorMessage"
+          type="error"
+          show-icon
+          class="mt-2"
+        ></el-alert>
+      </div>
+    </div>
+  </div>
+
+  <!-- 设置抽屉 -->
+  <el-drawer
+    v-model="showSettings"
+    title="设置"
+    direction="rtl"
+    size="80%"
+    :destroy-on-close="false"
+  >
+    <div class="settings-drawer p-4">
+      <el-form>
+        <div class="api-key-input mb-5">
+          <el-form-item label="API Key">
+            <el-input
+              v-model="apiKey"
+              type="password"
+              placeholder="请输入您的API Key"
+              show-password
+              @input="saveApiKey"
+            ></el-input>
+            <div class="mt-1 text-gray-600 text-sm">
+              API Key将安全地存储在您的浏览器中
+            </div>
+          </el-form-item>
+        </div>
+        <el-form-item label="选择模型">
+          <el-select v-model="model" class="w-full" placeholder="选择模型">
+            <el-option
+              v-for="item in models"
+              :key="item"
+              :label="item"
+              :value="item"
+            />
+          </el-select>
+        </el-form-item>
+      </el-form>
+    </div>
+  </el-drawer>
+
+  <!-- Footer -->
+  <div class="footer p-4 bg-white border-t text-center text-gray-600 text-sm">
+    © 2025 DeepSeek伴侣 | by <a href="https://www.huasheng.ai" target="_blank" class="text-blue-500 hover:underline">AI进化论-花生</a>
+    <el-button type="text" @click="showAuthorInfo = true" class="ml-2">
+      <el-icon><InfoFilled /></el-icon>
+    </el-button>
+  </div>
+
+  <!-- 作者信息弹窗 -->
+  <el-dialog
+    v-model="showAuthorInfo"
+    title="关于作者"
+    width="90%"
+    :max-width="500"
+    class="author-dialog"
+  >
+    <div class="author-info p-4">
+      <h3 class="text-lg font-semibold">花生 (AI进化论-花生)</h3>
+      <div class="author-desc text-gray-600 mt-2">
+        <p>AI Native Coder｜第一代不会写代码的独立开发者</p>
+        <p>AppStore 付费榜 Top1「小猫补光灯」开发者</p>
+        <p>10万+粉AI博主</p>
+        <p>微软｜LinkedIn AI课程讲师</p>
+        <p>全球旅居中...66%的数字游民</p>
+      </div>
+      <div class="social-links grid grid-cols-2 gap-3 mt-4">
+        <a href="https://www.youtube.com/@alchain" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
+          <el-icon><VideoCamera /></el-icon> YouTube
+        </a>
+        <a href="https://space.bilibili.com/14097567" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
+          <el-icon><VideoPlay /></el-icon> Bilibili
+        </a>
+        <a href="https://www.xiaohongshu.com/user/profile/5abc6f17e8ac2b109179dfdf" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
+          <el-icon><Picture /></el-icon> 小红书
+        </a>
+        <a href="https://x.com/AlchainHust" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
+          <el-icon><Message /></el-icon> Twitter
+        </a>
+        <div class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded">
+          <el-icon><ChatDotRound /></el-icon> 微信公众号：花叔
+        </div>
+      </div>
+    </div>
+  </el-dialog>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      messages: [],
+      inputMessage: '',
+      model: 'deepseek-ai/DeepSeek-R1',
+      models: [
+        'deepseek-ai/DeepSeek-R1',
+        'deepseek-ai/DeepSeek-V3',
+        'meta-llama/Llama-3.3-70B-Instruct'
+      ],
+      isLoading: false,
+      isTyping: false,
+      errorMessage: '',
+      apiKey: localStorage.getItem('deepseek_api_key') || '',
+      showSettings: false,
+      showSidebar: false,
+      chatHistory: [],
+      currentChatId: null,
+      showAuthorInfo: false
+    }
+  },
+  computed: {
+    currentChat() {
+      return this.chatHistory.find(chat => chat.id === this.currentChatId)
+    }
+  },
+  created() {
+    const savedHistory = localStorage.getItem('chat_history')
+    if (savedHistory) {
+      this.chatHistory = JSON.parse(savedHistory)
+      if (this.chatHistory.length > 0) {
+        this.currentChatId = this.chatHistory[0].id
+      }
+    }
+    if (!this.currentChatId) {
+      this.createNewChat()
+    }
+  },
+  methods: {
+    saveApiKey() {
+      localStorage.setItem('deepseek_api_key', this.apiKey)
+    },
+    createNewChat() {
+      const newChat = {
+        id: Date.now(),
+        title: '新对话',
+        messages: [],
+        createdAt: new Date().toISOString()
+      }
+      this.chatHistory.unshift(newChat)
+      this.currentChatId = newChat.id
+      this.saveChatHistory()
+      this.showSidebar = false
+    },
+    switchChat(chatId) {
+      this.currentChatId = chatId
+      this.showSidebar = false
+    },
+    deleteChat(chatId) {
+      const index = this.chatHistory.findIndex(chat => chat.id === chatId)
+      if (index !== -1) {
+        this.chatHistory.splice(index, 1)
+        if (this.chatHistory.length === 0) {
+          this.createNewChat()
+        } else {
+          this.currentChatId = this.chatHistory[0].id
+        }
+        this.saveChatHistory()
+      }
+    },
+    saveChatHistory() {
+      localStorage.setItem('chat_history', JSON.stringify(this.chatHistory))
+    },
+    focusInput() {
+      this.$refs.messageInput.focus()
+    },
+    updateChatTitle(message) {
+      if (!this.currentChat.title || this.currentChat.title === '新对话') {
+        this.currentChat.title = message.slice(0, 20) + (message.length > 20 ? '...' : '')
+        this.saveChatHistory()
+      }
+    },
+    toggleReasoning(index) {
+      this.currentChat.messages[index].isReasoningCollapsed =
+        !this.currentChat.messages[index].isReasoningCollapsed;
+      this.saveChatHistory();
+    },
+    scrollToBottom() {
+      this.$nextTick(() => {
+        const container = document.querySelector('.message-list');
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+        }
+      });
+    },
+    async sendMessage() {
+      if (!this.inputMessage.trim() || this.isLoading || !this.apiKey) return
+
+      const message = this.inputMessage.trim()
+      this.inputMessage = ''
+      this.updateChatTitle(message)
+
+      try {
+        this.isLoading = true
+        this.isTyping = true
+        this.errorMessage = ''
+
+        const userMessage = {
+          role: 'user',
+          content: message,
+          timestamp: new Date().toISOString()
+        }
+        this.currentChat.messages.push(userMessage)
+
+        const requestBody = {
+          model: this.model,
+          messages: this.currentChat.messages.map(msg => ({
+            role: msg.role,
+            content: msg.content
+          })),
+          stream: true,
+          temperature: 0.7,
+          max_tokens: 8192
+        }
+
+        const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${this.apiKey}`
+          },
+          body: JSON.stringify(requestBody)
+        })
+
+        if (!response.ok) {
+          const errorBody = await response.text()
+          throw new Error(`API请求失败: ${response.status} - ${errorBody}`)
+        }
+
+        const assistantMessage = {
+          role: 'assistant',
+          content: '',
+          reasoning_content: '',
+          isReasoningCollapsed: false,
+          timestamp: new Date().toISOString()
+        }
+        this.currentChat.messages.push(assistantMessage)
+
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          const chunk = decoder.decode(value)
+          const lines = chunk.split('\n').filter(line => line.trim())
+
+          for (const line of lines) {
+            if (line === 'data: [DONE]') break
+            try {
+              const data = JSON.parse(line.replace('data: ', ''))
+              const currentMessage = this.currentChat.messages[this.currentChat.messages.length - 1]
+
+              if (data.choices[0]?.delta?.reasoning_content !== undefined) {
+                currentMessage.reasoning_content += data.choices[0].delta.reasoning_content || ''
+              }
+              if (data.choices[0]?.delta?.content !== null && data.choices[0]?.delta?.content !== undefined) {
+                currentMessage.content += data.choices[0].delta.content || ''
+              }
+              this.currentChat.messages = [...this.currentChat.messages]
+              this.scrollToBottom()
+            } catch (error) {
+              console.error('数据解析错误:', error, '原始数据:', line)
+            }
+          }
+        }
+        this.saveChatHistory()
+      } catch (error) {
+        this.errorMessage = `请求失败: ${error.message}`
+        this.currentChat.messages.pop()
+      } finally {
+        this.isLoading = false
+        this.isTyping = false
+        this.$nextTick(() => {
+          const container = document.querySelector('.message-list')
+          if (container) {
+            container.scrollTop = container.scrollHeight
+          }
+        })
+      }
+    },
+    renderMarkdown(content) {
+      if (!content) return '';
+      try {
+        if (!window.markedInitialized) {
+          console.warn('等待 marked 初始化...');
+          return content;
+        }
+        return marked.parse(content);
+      } catch (error) {
+        console.error('Markdown 渲染错误:', error);
+        return content;
+      }
+    },
+    async copyMessage(content) {
+      try {
+        await navigator.clipboard.writeText(content);
+        this.$message({
+          message: '复制成功',
+          type: 'success',
+          duration: 2000
+        });
+      } catch (err) {
+        this.$message({
+          message: '复制失败，请手动复制',
+          type: 'error',
+          duration: 2000
+        });
+      }
+    },
+    async exportToPDF() {
+      try {
+        const tempDiv = document.createElement('div');
+        tempDiv.className = 'export-content';
+        
+        tempDiv.innerHTML = `
+          <h1 style="margin-bottom: 10px;">${this.currentChat.title || '聊天记录'}</h1>
+          <div style="color: #666; margin-bottom: 20px;">
+            创建时间：${new Date(this.currentChat.createdAt).toLocaleString('zh-CN')}
+          </div>
+        `;
+        
+        this.currentChat.messages.forEach(msg => {
+          const messageDiv = document.createElement('div');
+          messageDiv.style.cssText = 'margin: 15px 0; padding: 15px; border: 1px solid #eee; page-break-inside: avoid;';
+          
+          const headerDiv = document.createElement('div');
+          headerDiv.style.cssText = 'margin-bottom: 10px; display: flex; justify-content: space-between;';
+          const roleSpan = document.createElement('span');
+          roleSpan.style.fontWeight = 'bold';
+          roleSpan.textContent = msg.role === 'user' ? '用户' : this.model;
+          headerDiv.appendChild(roleSpan);
+          const timeSpan = document.createElement('span');
+          timeSpan.style.cssText = 'color: #666; font-size: 12px;';
+          timeSpan.textContent = new Date(msg.timestamp).toLocaleString('zh-CN');
+          headerDiv.appendChild(timeSpan);
+          
+          messageDiv.appendChild(headerDiv);
+          
+          if (msg.role === 'assistant' && msg.reasoning_content) {
+            const reasoningDiv = document.createElement('div');
+            reasoningDiv.style.cssText = 'margin: 10px 0; padding: 10px; background: #f5f5f5;';
+            const reasoningLabel = document.createElement('div');
+            reasoningLabel.style.cssText = 'font-weight: bold; margin-bottom: 5px;';
+            reasoningLabel.textContent = '思考过程：';
+            reasoningDiv.appendChild(reasoningLabel);
+            const reasoningContent = document.createElement('div');
+            reasoningContent.style.cssText = 'white-space: pre-wrap;';
+            reasoningContent.textContent = msg.reasoning_content;
+            reasoningDiv.appendChild(reasoningContent);
+            messageDiv.appendChild(reasoningDiv);
+          }
+          
+          const contentDiv = document.createElement('div');
+          contentDiv.style.whiteSpace = 'pre-wrap';
+          if (msg.role === 'assistant') {
+            const tempElement = document.createElement('div');
+            tempElement.innerHTML = this.renderMarkdown(msg.content);
+            contentDiv.textContent = this.extractTextFromMarkdown(tempElement);
+          } else {
+            contentDiv.textContent = msg.content;
+          }
+          
+          messageDiv.appendChild(contentDiv);
+          tempDiv.appendChild(messageDiv);
+        });
+        
+        const opt = {
+          margin: [15, 15],
+          filename: `${this.currentChat.title || '聊天记录'}.pdf`,
+          pagebreak: { mode: 'avoid-all' },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        document.body.appendChild(tempDiv);
+        
+        try {
+          await html2pdf().set(opt).from(tempDiv).save();
+          this.$message({
+            message: 'PDF导出成功',
+            type: 'success',
+            duration: 2000
+          });
+        } finally {
+          document.body.removeChild(tempDiv);
+        }
+      } catch (error) {
+        console.error('PDF导出失败:', error);
+        this.$message({
+          message: 'PDF导出失败',
+          type: 'error',
+          duration: 2000
+        });
+      }
+    },
+    extractTextFromMarkdown(element) {
+      let text = '';
+      const nodes = element.childNodes;
+      for (const node of nodes) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          text += node.textContent;
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          switch (node.tagName.toLowerCase()) {
+            case 'p':
+              text += this.extractTextFromMarkdown(node);
+              break;
+            case 'br':
+              text += ' ';
+              break;
+            case 'h1':
+            case 'h2':
+            case 'h3':
+            case 'h4':
+            case 'h5':
+            case 'h6':
+              text += this.extractTextFromMarkdown(node).toUpperCase();
+              break;
+            case 'ul':
+            case 'ol':
+              text += this.extractTextFromMarkdown(node);
+              break;
+            case 'li':
+              text += '• ' + this.extractTextFromMarkdown(node);
+              break;
+            case 'code':
+            case 'pre':
+              text += this.extractTextFromMarkdown(node);
+              break;
+            default:
+              text += this.extractTextFromMarkdown(node);
+          }
+        }
+      }
+      return text.trim();
+    }
+  }
+}
+</script>
+
+<style src="./index.css"></style>
+
+<style>
+/* 添加自定义样式以隐藏折叠状态下的思考过程 */
+.reasoning-body.collapsed {
+  display: none;
+}
+</style> 
