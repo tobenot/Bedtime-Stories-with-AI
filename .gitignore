@@ -1,0 +1,65 @@
+# 依赖目录
+node_modules/
+
+# 构建输出目录
+dist/
+build/
+
+# 可选：npm缓存目录
+.npm/
+
+# 可选：REPL历史记录
+.node_repl_history
+
+# 日志文件
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Node.js 报告（https://nodejs.org/api/report.html）
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# 运行时数据
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# 由 jscoverage/JSCover 生成的 instrumented libs 目录
+lib-cov/
+
+# 测试覆盖率目录（例如 istanbul）
+coverage/
+.nyc_output/
+
+# Grunt 临时文件目录 (参见 http://gruntjs.com/creating-plugins#storing-task-files)
+.grunt/
+
+# Bower 依赖目录
+bower_components/
+
+# 编辑器配置目录或文件
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+
+# 环境变量配置文件 (生产环境等)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 可选：eslint缓存文件
+.eslintcache
+
+# 可选：stylelint缓存文件
+.stylelintcache
+
+# 操作系统生成的文件
+.DS_Store
+Thumbs.db 
