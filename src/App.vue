@@ -169,10 +169,10 @@
               ref="messageInput"
               v-model="inputMessage"
               type="textarea"
-              :rows="2"
+              :autosize="{ minRows: 2, maxRows: 6 }"
               :disabled="!apiKey"
               placeholder="输入你的消息..."
-              @keyup.enter="sendMessage"
+              @keydown.native.ctrl.enter.prevent="sendMessage"
             ></el-input>
           </el-col>
           <el-col :span="4">
@@ -216,6 +216,7 @@
               placeholder="请输入您的API Key"
               show-password
               @input="saveApiKey"
+              autocomplete="off"
             ></el-input>
             <div class="mt-1 text-gray-600 text-sm">
               API Key将安全地存储在您的浏览器中
@@ -233,6 +234,10 @@
           </el-select>
         </el-form-item>
       </el-form>
+      <br>
+      <div class="mt-1 text-gray-600 text-sm">
+        电脑端可以使用Ctrl+Enter发送消息
+      </div>
     </div>
   </el-drawer>
 
