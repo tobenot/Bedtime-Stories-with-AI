@@ -207,22 +207,35 @@
     class="settings-drawer"
   >
     <div class="settings-drawer p-4">
-      <el-form>
-        <div class="api-key-input mb-5">
-          <el-form-item label="API Key">
-            <el-input
-              v-model="apiKey"
-              type="password"
-              placeholder="请输入您的API Key"
-              show-password
-              @input="saveApiKey"
-              autocomplete="off"
-            ></el-input>
-            <div class="mt-1 text-gray-600 text-sm">
-              API Key将安全地存储在您的浏览器中
-            </div>
-          </el-form-item>
-        </div>
+      <el-form label-width="80px">
+        <!-- API Key 输入 -->
+        <el-form-item label="API Key">
+          <el-input
+            v-model="apiKey"
+            type="password"
+            placeholder="请输入您的API Key"
+            show-password
+            @input="saveApiKey"
+            autocomplete="off"
+          ></el-input>
+          <div class="mt-1 text-gray-600 text-sm">
+            请前往&nbsp;
+            <a href="https://cloud.siliconflow.cn/i/M9KJQRfy" target="_blank" class="text-secondary underline">
+              硅基流动 
+            </a>
+            &nbsp;获取。输入后将安全地存储在您的浏览器中。
+          </div>
+        </el-form-item>
+
+        <!-- 新增温度设置项 -->
+        <el-form-item label="温度">
+          <el-slider class="custom-slider" v-model="temperature" :min="0" :max="1" :step="0.1" show-tooltip></el-slider>
+          <div class="mt-1 text-gray-600 text-sm">
+            温度参数决定回答的随机性。较低的温度（如0.3）使回答更确定，而较高的温度（如0.7）则使回答更具创造性和随机性。
+          </div>
+        </el-form-item>
+
+        <!-- 模型选择 -->
         <el-form-item label="选择模型">
           <el-select v-model="model" class="w-full" placeholder="选择模型">
             <el-option
@@ -232,9 +245,13 @@
               :value="item"
             />
           </el-select>
+          <div class="mt-1 text-gray-600 text-sm">
+            R1：深度思考。
+            <br/>
+            V3：不开深度思考，比较便宜但没那么聪明。
+          </div>
         </el-form-item>
       </el-form>
-      <br>
       <div class="mt-1 text-gray-600 text-sm">
         电脑端可以使用Ctrl+Enter发送消息
       </div>
@@ -335,6 +352,7 @@ export default {
         'deepseek-ai/DeepSeek-V3',
         'meta-llama/Llama-3.3-70B-Instruct'
       ],
+      temperature: 1,
       isLoading: false,
       isTyping: false,
       errorMessage: '',
@@ -448,7 +466,7 @@ export default {
             content: msg.content
           })),
           stream: true,
-          temperature: 0.7,
+          temperature: this.temperature,
           max_tokens: 8192
         }
 
@@ -730,5 +748,25 @@ export default {
 }
 .qq-groups .el-button:last-child {
   margin-bottom: 0;
+}
+
+/* 自定义温度滑动条样式 */
+.custom-slider .el-slider__runway {
+  height: 8px;
+  border-radius: 4px;
+  background-color: #dcdfe6;
+}
+.custom-slider .el-slider__bar {
+  height: 8px;
+  border-radius: 4px;
+  background-color: #409EFF;
+}
+.custom-slider .el-slider__button {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  background-color: #409EFF;
+  box-shadow: none;
 }
 </style> 
