@@ -183,7 +183,7 @@
     :destroy-on-close="false"
   >
     <div class="settings-drawer p-4">
-      <el-form>
+      <el-form label-width="80px">
         <div class="api-key-input mb-5">
           <el-form-item label="API Key">
             <el-input
@@ -194,7 +194,11 @@
               @input="saveApiKey"
             ></el-input>
             <div class="mt-1 text-gray-600 text-sm">
-              API Key将安全地存储在您的浏览器中
+              请前往&nbsp;
+              <a href="https://cloud.siliconflow.cn/i/M9KJQRfy" target="_blank" class="text-secondary underline">
+                硅基流动 
+              </a>
+              &nbsp;获取。输入后将安全地存储在您的浏览器中。
             </div>
           </el-form-item>
         </div>
@@ -207,6 +211,17 @@
               :value="item"
             />
           </el-select>
+          <div class="mt-1 text-gray-600 text-sm">
+            R1：深度思考。
+            <br/>
+            V3：不开深度思考，比较便宜但没那么聪明。
+          </div>
+        </el-form-item>
+        <el-form-item label="温度">
+          <el-slider class="custom-slider" v-model="temperature" :min="0" :max="1" :step="0.1" show-tooltip></el-slider>
+          <div class="mt-1 text-gray-600 text-sm">
+            温度参数决定回答的随机性。较低的温度（如0.3）使回答更确定，而较高的温度（如0.7）则使回答更具创造性和随机性。
+          </div>
         </el-form-item>
       </el-form>
     </div>
@@ -285,7 +300,8 @@ export default {
       showSidebar: false,
       chatHistory: [],
       currentChatId: null,
-      showAuthorInfo: false
+      showAuthorInfo: false,
+      temperature: 1
     }
   },
   computed: {
@@ -388,7 +404,7 @@ export default {
             content: msg.content
           })),
           stream: true,
-          temperature: 0.7,
+          temperature: this.temperature,
           max_tokens: 8192
         }
 
@@ -643,5 +659,25 @@ export default {
 /* 添加自定义样式以隐藏折叠状态下的思考过程 */
 .reasoning-body.collapsed {
   display: none;
+}
+
+/* 自定义温度滑动条样式 */
+.custom-slider .el-slider__runway {
+  height: 8px;
+  border-radius: 4px;
+  background-color: #dcdfe6;
+}
+.custom-slider .el-slider__bar {
+  height: 8px;
+  border-radius: 4px;
+  background-color: #409EFF;
+}
+.custom-slider .el-slider__button {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  background-color: #409EFF;
+  box-shadow: none;
 }
 </style> 
