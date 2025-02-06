@@ -131,7 +131,7 @@
             :key="index" 
             class="message-bubble" 
             :class="msg.role === 'user' ? 'user-message' : 'assistant-message'">
-            <div v-if="msg.role === 'user'">{{ msg.content }}</div>
+            <div v-if="msg.role === 'user'" v-html="renderMarkdown(msg.content)"></div>
             <template v-else>
               <template v-if="msg.reasoning_content">
                 <div class="reasoning-content bg-reasoningBg text-white p-2 rounded mb-2">
@@ -169,7 +169,7 @@
               ref="messageInput"
               v-model="inputMessage"
               type="textarea"
-              :autosize="{ minRows: 2, maxRows: 6 }"
+              :autosize="{ minRows: 2, maxRows: 10 }"
               :disabled="!apiKey"
               placeholder="输入你的消息..."
               @keydown.native.ctrl.enter.prevent="sendMessage"
@@ -314,6 +314,7 @@
 </template>
 
 <script>
+import { marked } from 'marked';
 import html2pdf from 'html2pdf.js';
 import ChatItem from './components/ChatItem.vue';
 import ScriptSelector from './components/ScriptSelector.vue';
@@ -520,10 +521,6 @@ export default {
     renderMarkdown(content) {
       if (!content) return '';
       try {
-        if (!window.markedInitialized) {
-          console.warn('等待 marked 初始化...');
-          return content;
-        }
         return marked.parse(content);
       } catch (error) {
         console.error('Markdown 渲染错误:', error);
