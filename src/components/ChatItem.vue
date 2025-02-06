@@ -6,7 +6,7 @@
       <el-icon :class="active ? 'text-white' : 'text-secondary'"><ChatRound /></el-icon>
       <!-- 点击标题切换对话 -->
       <span class="chat-item-title flex-1" @click="$emit('switch', chat.id)">
-        {{ chat.title || '新故事' }}
+        {{ chat.title || '新对话' }}
       </span>
       <!-- 删除按钮 -->
       <el-button 

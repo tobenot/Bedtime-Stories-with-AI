@@ -4,7 +4,7 @@
     <div class="sidebar w-64 hidden md:flex flex-col custom-scrollbar">
       <div class="sidebar-header p-4 border-b">
         <el-button class="btn-primary w-full" @click="createNewChat">
-          <el-icon><Plus /></el-icon> 新故事
+          <el-icon><Plus /></el-icon> 新对话
         </el-button>
       </div>
       <div class="chat-list flex-1 overflow-y-auto p-4 custom-scrollbar">
@@ -37,7 +37,7 @@
       <!-- 侧边栏内容保持不变 -->
       <div class="sidebar-header p-4 border-b">
         <el-button class="btn-primary w-full" @click="createNewChat">
-          <el-icon><Plus /></el-icon> 新故事
+          <el-icon><Plus /></el-icon> 新对话
         </el-button>
       </div>
       <div class="chat-list flex-1 overflow-y-auto p-4">
@@ -116,9 +116,10 @@
             <div class="empty-state-icon mb-4">
               <img src="./logo.svg" alt="Logo" class="w-12 h-12 inline-block" />
             </div>
-            <h3 class="empty-state-title text-2xl font-semibold text-primary mb-2">开始新的故事</h3>
+            <h3 class="empty-state-title text-2xl font-semibold text-primary mb-2">开始新的对话</h3>
             <p class="empty-state-description text-base text-customGray mb-4">
-              选择剧本，或者自己在下方输入框输入你想要的故事开头！
+              如果你要把这里当做普通的对话，请直接像在官方app那样使用~<br>
+              如果你要玩剧本，请选择剧本，或者自己在下方输入框输入你想要的故事开头！
             </p>
             <el-button class="btn-small" @click="focusInput">手动输入</el-button>
             <el-button class="btn-small ml-2" @click="openScriptPanel">选择剧本</el-button>
@@ -365,7 +366,7 @@ export default {
     createNewChat() {
       const newChat = {
         id: Date.now(),
-        title: '新故事',
+        title: '新对话',
         messages: [],
         createdAt: new Date().toISOString()
       }
@@ -397,7 +398,7 @@ export default {
       this.$refs.messageInput.focus()
     },
     updateChatTitle(message) {
-      if (!this.currentChat.title || this.currentChat.title === '新故事') {
+      if (!this.currentChat.title || this.currentChat.title === '新对话') {
         this.currentChat.title = message.slice(0, 10) + (message.length > 10 ? '...' : '')
         this.saveChatHistory()
       }
