@@ -259,6 +259,7 @@
 </template>
 
 <script>
+import { marked } from 'marked';
 import html2pdf from 'html2pdf.js';
 import ChatItem from './components/ChatItem.vue';
 
@@ -460,10 +461,6 @@ export default {
     renderMarkdown(content) {
       if (!content) return '';
       try {
-        if (!window.markedInitialized) {
-          console.warn('等待 marked 初始化...');
-          return content;
-        }
         return marked.parse(content);
       } catch (error) {
         console.error('Markdown 渲染错误:', error);
