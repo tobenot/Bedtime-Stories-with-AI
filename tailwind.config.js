@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const plugin = require('tailwindcss/plugin')
+
 module.exports = {
   content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   theme: {
@@ -43,5 +45,23 @@ module.exports = {
   },
   plugins: [
     require('tailwindcss-scrollbar'),
+    // 注册自定义小按钮组件
+    plugin(function({ addComponents, theme }) {
+      const smallButtons = {
+        '.btn-small': {
+          padding: `${theme('spacing.2')} ${theme('spacing.3')}`, // 内边距
+          fontSize: theme('fontSize.sm'),                        // 小号字体
+          fontWeight: theme('fontWeight.medium'),
+          borderRadius: theme('borderRadius.md'),
+          backgroundColor: theme('colors.primary.DEFAULT'),
+          color: theme('colors.white'),
+          transition: 'background-color 0.2s ease',
+          '&:hover': {
+            backgroundColor: theme('colors.primary.dark'),
+          },
+        },
+      }
+      addComponents(smallButtons)
+    })
   ],
 } 

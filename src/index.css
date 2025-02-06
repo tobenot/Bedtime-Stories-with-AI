@@ -136,4 +136,12 @@
 /* 新增全局字体覆盖，确保所有组件均使用游戏风格字体 */
 * {
   font-family: 'Source Han Sans', '思源黑体', sans-serif !important;
+}
+
+/* 定义小按钮的样式 */
+.btn-small {
+  @apply px-3 py-1 text-sm font-medium rounded-md bg-primary text-white transition-colors duration-200;
+}
+.btn-small:hover {
+  @apply bg-primary-dark;
 } 

@@ -17,6 +17,16 @@
           @delete="deleteChat"
         />
       </div>
+      
+      <!-- 新增QQ群按钮使用自定义小按钮样式 -->
+      <div class="qq-groups p-4 border-t mt-4">
+        <el-button class="btn-small w-full mb-2" @click="joinGroup('软件群')">
+          加入QQ群【与AI的睡前故事】
+        </el-button><br>
+        <el-button class="btn-small w-full" @click="joinGroup('作者粉丝群')">
+          加入QQ群【丶青萝卜的母港】
+        </el-button>
+      </div>
     </div>
 
     <!-- 移动端侧边栏 -->
@@ -39,6 +49,16 @@
           @switch="mobileSwitch"
           @delete="deleteChat"
         />
+      </div>
+      
+      <!-- 移动端新增的QQ群按钮 -->
+      <div class="qq-groups p-4 border-t mt-4">
+        <el-button class="btn-small w-full mb-2" @click="joinGroup('软件群')">
+          加入QQ群【与AI的睡前故事】
+        </el-button>
+        <el-button class="btn-small w-full" @click="joinGroup('作者粉丝群')">
+          加入QQ群【丶青萝卜的母港】
+        </el-button>
       </div>
     </div>
 
@@ -100,8 +120,8 @@
             <p class="empty-state-description text-base text-customGray mb-4">
               选择剧本，或者自己在下方输入框输入你想要的故事开头！
             </p>
-            <el-button type="primary" @click="focusInput">手动输入</el-button>
-            <el-button type="primary" @click="openScriptPanel" class="ml-2">选择剧本</el-button>
+            <el-button class="btn-small" @click="focusInput">手动输入</el-button>
+            <el-button class="btn-small ml-2" @click="openScriptPanel">选择剧本</el-button>
           </div>
         </template>
         <template v-else>
@@ -678,6 +698,17 @@ export default {
       console.log('[App] script selected:', script);
       this.inputMessage = script.content;
       this.focusInput();
+    },
+    joinGroup(groupName) {
+      let url = ''
+      if (groupName === '软件群') {
+        url = 'http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=PIlY1ohFyAaT_kUWnu3MBV0I4B5bKkth&authKey=VAPHwBjqO27MTXwN5k9OsZAp9BulERgk5DHA2Wo%2BxZKbz1RAgjCXXK9NHM3PZ0T0&noverify=0&group_code=1028832603'
+      } else if (groupName === '作者粉丝群') {
+        url = 'http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=wnanEY5EFnmZkgsxB8Ekm3_rF0wEfC-m&authKey=unYZXpjELI9S9BFaLyKZssgbItkEPNnDcaYJ0jOn7Vdk4UGJZNw97wBpML6QW8hV&noverify=0&group_code=1028122611'
+      }
+      if (url) {
+        window.open(url, '_blank')
+      }
     }
   }
 }
@@ -689,5 +720,12 @@ export default {
 /* 添加自定义样式以隐藏折叠状态下的思考过程 */
 .reasoning-body.collapsed {
   display: none;
+}
+
+.qq-groups .el-button {
+  margin-bottom: 10px;
+}
+.qq-groups .el-button:last-child {
+  margin-bottom: 0;
 }
 </style> 
