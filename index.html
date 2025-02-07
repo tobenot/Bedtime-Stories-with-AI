@@ -1301,7 +1301,12 @@
                     this.$nextTick(() => {
                         const container = document.querySelector('.message-list');
                         if (container) {
-                            container.scrollTop = container.scrollHeight;
+                            const threshold = 50; // 如果距离底部小于50px，则认为用户处于底部
+                            const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+                            // 只有当距离底部小于阈值时，才自动滚动到底部
+                            if (distanceFromBottom <= threshold) {
+                                container.scrollTop = container.scrollHeight;
+                            }
                         }
                     });
                 },
@@ -1412,7 +1417,7 @@
                                         currentMessage.content += data.choices[0].delta.content || ''
                                     }
 
-                                    // 强制更新视图并滚动到底部
+                                    // 强制更新视图并尝试滚动到底部（仅当满足条件时）
                                     this.currentChat.messages = [...this.currentChat.messages]
                                     this.scrollToBottom();
                                 } catch (error) {
@@ -1429,10 +1434,7 @@
                     } finally {
                         this.isLoading = false
                         this.isTyping = false
-                        this.$nextTick(() => {
-                            const container = document.querySelector('.message-list')
-                            container.scrollTop = container.scrollHeight
-                        })
+                        this.scrollToBottom()
                     }
                 },
                 renderMarkdown(content) {
