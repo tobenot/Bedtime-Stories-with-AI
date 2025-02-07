@@ -62,6 +62,27 @@ module.exports = {
         },
       }
       addComponents(smallButtons)
+    }),
+    // 注册刷新按钮组件 (.btn-refresh)
+    plugin(function({ addComponents, theme }) {
+      const refreshButton = {
+        '.btn-refresh': {
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: `${theme('spacing.2')} ${theme('spacing.3')}`, // 使用内边距控制尺寸
+          fontSize: theme('fontSize.sm'),
+          fontWeight: theme('fontWeight.medium'),
+          borderRadius: theme('borderRadius.md'), // 使用常规圆角
+          backgroundColor: theme('colors.gray.400'),
+          color: theme('colors.white'),
+          transition: 'background-color 0.2s ease',
+          '&:hover': {
+            backgroundColor: theme('colors.primary.DEFAULT'),
+          },
+        },
+      }
+      addComponents(refreshButton)
     })
   ],
 } 

@@ -149,6 +149,12 @@
                 </div>
               </template>
               <div class="markdown-content" v-html="renderMarkdown(msg.content)"></div>
+              <!-- 使用拟物化刷新按钮：默认灰色，悬停时变为主色 -->
+              <div v-if="index === currentChat.messages.length - 1 && !isTyping" class="regenerate-btn mt-2">
+                <el-button class="btn-refresh" @click="sendMessage(true)">
+                  <el-icon><Refresh /></el-icon>
+                </el-button>
+              </div>
             </template>
           </div>
           <div v-if="isTyping" class="message-bubble assistant-message">
@@ -348,6 +354,7 @@
 
 <script>
 import { marked } from 'marked';
+import { Refresh } from '@element-plus/icons-vue';
 import html2pdf from 'html2pdf.js';
 import ChatItem from './components/ChatItem.vue';
 import ScriptSelector from './components/ScriptSelector.vue';
@@ -467,24 +474,31 @@ export default {
         }
       });
     },
-    async sendMessage() {
-      if (!this.inputMessage.trim() || this.isLoading || !this.apiKey) return
-
-      const message = this.inputMessage.trim()
-      this.inputMessage = ''
-      this.updateChatTitle(message)
-
-      try {
-        this.isLoading = true
-        this.isTyping = true
-        this.errorMessage = ''
-
+    async sendMessage(isRegenerate = false) {
+      if (isRegenerate) {
+        // 如果为重新生成，删除最后一条助手消息(仅当其角色为 assistant)
+        if (!this.currentChat.messages.length) return;
+        const lastMessage = this.currentChat.messages[this.currentChat.messages.length - 1];
+        if (lastMessage.role !== 'assistant') return;
+        this.currentChat.messages.pop();
+        this.saveChatHistory();
+      } else {
+        if (!this.inputMessage.trim() || this.isLoading || !this.apiKey) return;
+        var message = this.inputMessage.trim();
+        this.inputMessage = '';
+        this.updateChatTitle(message);
         const userMessage = {
           role: 'user',
           content: message,
           timestamp: new Date().toISOString()
-        }
-        this.currentChat.messages.push(userMessage)
+        };
+        this.currentChat.messages.push(userMessage);
+      }
+
+      try {
+        this.isLoading = true;
+        this.isTyping = true;
+        this.errorMessage = '';
 
         const assistantMessage = {
           role: 'assistant',
@@ -492,8 +506,8 @@ export default {
           reasoning_content: '',
           isReasoningCollapsed: this.defaultHideReasoning,
           timestamp: new Date().toISOString()
-        }
-        this.currentChat.messages.push(assistantMessage)
+        };
+        this.currentChat.messages.push(assistantMessage);
 
         const requestBody = {
           model: this.model,
@@ -504,7 +518,7 @@ export default {
           stream: true,
           temperature: this.temperature,
           max_tokens: 4096
-        }
+        };
 
         const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
           method: 'POST',
@@ -513,58 +527,59 @@ export default {
             'Authorization': `Bearer ${this.apiKey}`
           },
           body: JSON.stringify(requestBody)
-        })
+        });
 
         if (!response.ok) {
-          const errorBody = await response.text()
-          throw new Error(`API请求失败: ${response.status} - ${errorBody}`)
+          const errorBody = await response.text();
+          throw new Error(`API请求失败: ${response.status} - ${errorBody}`);
         }
 
-        const reader = response.body.getReader()
-        const decoder = new TextDecoder()
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
 
         while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-          const chunk = decoder.decode(value)
-          const lines = chunk.split('\n').filter(line => line.trim())
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n').filter(line => line.trim());
 
           for (const line of lines) {
-            if (line === 'data: [DONE]') break
+            if (line === 'data: [DONE]') break;
             try {
-              const jsonStr = line.replace('data: ', '')
+              const jsonStr = line.replace('data: ', '');
               if (!jsonStr.trim()) continue;
-              const data = JSON.parse(jsonStr)
+              const data = JSON.parse(jsonStr);
 
               if (data.code) {
-                console.error('API 错误:', data.message)
-                throw new Error(`API returned error: ${data.message}`)
+                console.error('API 错误:', data.message);
+                throw new Error(`API returned error: ${data.message}`);
               }
 
-              const currentMessage = this.currentChat.messages[this.currentChat.messages.length - 1]
+              const currentMessage = this.currentChat.messages[this.currentChat.messages.length - 1];
 
               if (data.choices[0]?.delta?.reasoning_content !== undefined) {
-                currentMessage.reasoning_content += data.choices[0].delta.reasoning_content || ''
+                currentMessage.reasoning_content += data.choices[0].delta.reasoning_content || '';
               }
               if (data.choices[0]?.delta?.content !== null && data.choices[0]?.delta?.content !== undefined) {
-                currentMessage.content += data.choices[0].delta.content || ''
+                currentMessage.content += data.choices[0].delta.content || '';
               }
-              this.currentChat.messages = [...this.currentChat.messages]
-              this.scrollToBottom()
+              // 触发视图更新
+              this.currentChat.messages = [...this.currentChat.messages];
+              this.scrollToBottom();
             } catch (error) {
-              console.error('数据解析错误:', error, '原始数据:', line)
+              console.error('数据解析错误:', error, '原始数据:', line);
             }
           }
         }
-        this.saveChatHistory()
+        this.saveChatHistory();
       } catch (error) {
-        this.errorMessage = `请求失败: ${error.message}`
-        this.inputMessage = message;
-        this.currentChat.messages.pop()
+        this.errorMessage = `请求失败: ${error.message}`;
+        // 出错时删除新增的助手消息
+        this.currentChat.messages.pop();
       } finally {
-        this.isLoading = false
-        this.isTyping = false
-        this.scrollToBottom()
+        this.isLoading = false;
+        this.isTyping = false;
+        this.scrollToBottom();
       }
     },
     renderMarkdown(content) {
