@@ -467,7 +467,7 @@ export default {
           })),
           stream: true,
           temperature: this.temperature,
-          max_tokens: 8192
+          max_tokens: 4096
         }
 
         const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
