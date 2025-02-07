@@ -84,12 +84,19 @@ export default {
   },
   methods: {
     selectScript(script) {
-      // 弹出 Element UI 的确认对话框，预览剧本内容
-      this.$confirm(script.content, '剧本预览', {
+      // 构造消息内容，追加作者链接及作者名称（如果存在）
+      let message = script.content;
+      if (script.authorLink && script.authorName) {
+        message += `<br/><a href="${script.authorLink}" target="_blank" rel="noopener" style="color: blue; text-decoration: underline;">作者：${script.authorName}</a>`;
+      } else if (script.authorLink) {
+        message += `<br/><a href="${script.authorLink}" target="_blank" rel="noopener" style="color: blue; text-decoration: underline;">作者链接</a>`;
+      }
+      this.$confirm(message, '剧本预览', {
         confirmButtonText: '确认使用该剧本',
         cancelButtonText: '取消',
-        type: 'info',
-        customClass: 'confirm-script-preview'
+        type: '', // 移除图标类型
+        customClass: 'confirm-script-preview',
+        dangerouslyUseHTMLString: true // 允许 HTML 字符串显示
       }).then(() => {
         console.log('[ScriptSelector] script confirmed:', script);
         this.$emit('script-selected', script);
