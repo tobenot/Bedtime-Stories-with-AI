@@ -183,7 +183,7 @@
               :autosize="{ minRows: 2, maxRows: 10 }"
               :disabled="!apiKey"
               placeholder="输入你的消息..."
-              @keydown.native.ctrl.enter.prevent="sendMessage"
+              @keydown.native.ctrl.enter.prevent="sendMessage()"
             ></el-input>
           </el-col>
           <el-col :span="4">
@@ -191,7 +191,7 @@
               class="btn-primary w-full h-full"
               :loading="isLoading"
               :disabled="!apiKey"
-              @click="sendMessage"
+              @click="sendMessage()"
             >
               发送
             </el-button>
