@@ -251,9 +251,25 @@
             V3：不开深度思考，比较便宜但没那么聪明。
           </div>
         </el-form-item>
+
+        <!-- 新增默认隐藏思考过程设置项 -->
+        <el-form-item label="隐藏思考">
+          <el-switch
+            v-model="defaultHideReasoning"
+            active-color="#409EFF"
+            inactive-color="#dcdfe6"
+            @change="saveDefaultHideReasoning"
+          ></el-switch>
+          <div class="mt-1 text-gray-600 text-sm">
+            &nbsp;&nbsp;开启后，助手的思考过程将默认隐藏，点击图标可展开/折叠。
+          </div>
+        </el-form-item>
       </el-form>
       <div class="mt-1 text-gray-600 text-sm">
         电脑端可以使用Ctrl+Enter发送消息
+      </div>
+      <div class="mt-1 text-gray-600 text-sm">
+        从现象中推测，硅基流动在单次回复中超过五分钟就会直接截断，可能会导致正文不完整。如果你遇到类似问题，可以尝试让它精简思考长度。
       </div>
     </div>
   </el-drawer>
@@ -363,7 +379,8 @@ export default {
       currentChatId: null,
       showAuthorInfo: false,
       showScriptPanel: false,
-      scripts: scripts
+      scripts: scripts,
+      defaultHideReasoning: JSON.parse(localStorage.getItem('default_hide_reasoning') || 'false')
     }
   },
   computed: {
@@ -386,6 +403,9 @@ export default {
   methods: {
     saveApiKey() {
       localStorage.setItem('deepseek_api_key', this.apiKey)
+    },
+    saveDefaultHideReasoning() {
+      localStorage.setItem('default_hide_reasoning', JSON.stringify(this.defaultHideReasoning));
     },
     createNewChat() {
       const newChat = {
@@ -436,7 +456,11 @@ export default {
       this.$nextTick(() => {
         const container = document.querySelector('.message-list');
         if (container) {
-          container.scrollTop = container.scrollHeight;
+          const threshold = 50; // 阈值：如果用户距离底部超过50像素，则不自动滚动
+          // 只有当用户接近底部时才自动滚动到底部
+          if (container.scrollTop + container.clientHeight + threshold >= container.scrollHeight) {
+            container.scrollTop = container.scrollHeight;
+          }
         }
       });
     },
@@ -458,6 +482,15 @@ export default {
           timestamp: new Date().toISOString()
         }
         this.currentChat.messages.push(userMessage)
+
+        const assistantMessage = {
+          role: 'assistant',
+          content: '',
+          reasoning_content: '',
+          isReasoningCollapsed: this.defaultHideReasoning,
+          timestamp: new Date().toISOString()
+        }
+        this.currentChat.messages.push(assistantMessage)
 
         const requestBody = {
           model: this.model,
@@ -484,15 +517,6 @@ export default {
           throw new Error(`API请求失败: ${response.status} - ${errorBody}`)
         }
 
-        const assistantMessage = {
-          role: 'assistant',
-          content: '',
-          reasoning_content: '',
-          isReasoningCollapsed: false,
-          timestamp: new Date().toISOString()
-        }
-        this.currentChat.messages.push(assistantMessage)
-
         const reader = response.body.getReader()
         const decoder = new TextDecoder()
 
@@ -505,7 +529,15 @@ export default {
           for (const line of lines) {
             if (line === 'data: [DONE]') break
             try {
-              const data = JSON.parse(line.replace('data: ', ''))
+              const jsonStr = line.replace('data: ', '')
+              if (!jsonStr.trim()) continue;
+              const data = JSON.parse(jsonStr)
+
+              if (data.code) {
+                console.error('API 错误:', data.message)
+                throw new Error(`API returned error: ${data.message}`)
+              }
+
               const currentMessage = this.currentChat.messages[this.currentChat.messages.length - 1]
 
               if (data.choices[0]?.delta?.reasoning_content !== undefined) {
@@ -524,16 +556,12 @@ export default {
         this.saveChatHistory()
       } catch (error) {
         this.errorMessage = `请求失败: ${error.message}`
+        this.inputMessage = message;
         this.currentChat.messages.pop()
       } finally {
         this.isLoading = false
         this.isTyping = false
-        this.$nextTick(() => {
-          const container = document.querySelector('.message-list')
-          if (container) {
-            container.scrollTop = container.scrollHeight
-          }
-        })
+        this.scrollToBottom()
       }
     },
     renderMarkdown(content) {
