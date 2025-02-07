@@ -149,11 +149,16 @@
                 </div>
               </template>
               <div class="markdown-content" v-html="renderMarkdown(msg.content)"></div>
-              <!-- 使用拟物化刷新按钮：默认灰色，悬停时变为主色 -->
-              <div v-if="index === currentChat.messages.length - 1 && !isTyping" class="regenerate-btn mt-2">
-                <el-button class="btn-refresh" @click="sendMessage(true)">
-                  <el-icon><Refresh /></el-icon>
+              <!-- 添加复制按钮（每个助手消息都有），以及重新生成按钮（仅最新消息显示） -->
+              <div class="assistant-controls mt-2 flex gap-2 justify-start">
+                <el-button class="btn-copy" @click="copyMessage(msg.content)">
+                  <el-icon style="font-size: 1.6rem;"><CopyDocument /></el-icon>
                 </el-button>
+                <template v-if="index === currentChat.messages.length - 1 && !isTyping">
+                  <el-button class="btn-refresh" @click="sendMessage(true)">
+                    <el-icon style="font-size: 1.6rem;"><Refresh /></el-icon>
+                  </el-button>
+                </template>
               </div>
             </template>
           </div>
@@ -354,7 +359,7 @@
 
 <script>
 import { marked } from 'marked';
-import { Refresh } from '@element-plus/icons-vue';
+import { Refresh, CopyDocument } from '@element-plus/icons-vue';
 import html2pdf from 'html2pdf.js';
 import ChatItem from './components/ChatItem.vue';
 import ScriptSelector from './components/ScriptSelector.vue';

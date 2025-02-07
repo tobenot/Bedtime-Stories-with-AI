@@ -63,10 +63,10 @@ module.exports = {
       }
       addComponents(smallButtons)
     }),
-    // 注册刷新按钮组件 (.btn-refresh)
+    // 注册图标按钮组件 (.btn-refresh 和 .btn-copy)
     plugin(function({ addComponents, theme }) {
-      const refreshButton = {
-        '.btn-refresh': {
+      const iconButton = {
+        '.btn-refresh, .btn-copy': {
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -82,7 +82,7 @@ module.exports = {
           },
         },
       }
-      addComponents(refreshButton)
+      addComponents(iconButton)
     })
   ],
 } 
