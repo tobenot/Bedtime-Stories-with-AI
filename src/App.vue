@@ -237,7 +237,7 @@
 
         <!-- 模型选择 -->
         <el-form-item label="选择模型">
-          <el-select v-model="model" class="w-full" placeholder="选择模型">
+          <el-select v-model="model" class="w-full" placeholder="选择模型" @change="saveModel">
             <el-option
               v-for="item in models"
               :key="item"
@@ -362,7 +362,7 @@ export default {
     return {
       messages: [],
       inputMessage: '',
-      model: 'deepseek-ai/DeepSeek-R1',
+      model: localStorage.getItem('model') || 'deepseek-ai/DeepSeek-R1',
       models: [
         'deepseek-ai/DeepSeek-R1',
         'deepseek-ai/DeepSeek-V3',
@@ -403,6 +403,9 @@ export default {
   methods: {
     saveApiKey() {
       localStorage.setItem('deepseek_api_key', this.apiKey)
+    },
+    saveModel() {
+      localStorage.setItem('model', this.model)
     },
     saveDefaultHideReasoning() {
       localStorage.setItem('default_hide_reasoning', JSON.stringify(this.defaultHideReasoning));
