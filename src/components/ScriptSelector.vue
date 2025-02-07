@@ -1,11 +1,20 @@
 <template>
   <el-dialog :title="dialogTitle" v-model="internalVisible" :width="dialogWidth">
+    <el-tabs v-model="selectedCategory" type="border-card" class="mb-4">
+      <el-tab-pane label="全部" name="全部"></el-tab-pane>
+      <el-tab-pane label="最新" name="最新"></el-tab-pane>
+      <el-tab-pane label="热门" name="热门"></el-tab-pane>
+      <el-tab-pane label="基础" name="基础"></el-tab-pane>
+      <el-tab-pane label="跑团" name="跑团"></el-tab-pane>
+      <el-tab-pane label="男性向" name="男性向"></el-tab-pane>
+      <el-tab-pane label="女性向" name="女性向"></el-tab-pane>
+    </el-tabs>
     <div class="mb-4">
-      <el-input
-        v-model="searchQuery"
-        placeholder="搜索剧本或标签"
-        clearable
-      />
+      <el-input v-model="searchQuery" placeholder="搜索剧本或标签" clearable>
+        <template slot="prefix">
+          <i class="el-icon-search"></i>
+        </template>
+      </el-input>
     </div>
     <div class="script-list">
       <el-card
@@ -56,21 +65,30 @@ export default {
     return {
       searchQuery: '',
       internalVisible: this.modelValue,
-      dialogWidth: window.innerWidth < 768 ? '90%' : '50%'
+      dialogWidth: window.innerWidth < 768 ? '90%' : '80%',
+      selectedCategory: '基础'
     }
   },
   computed: {
     filteredScripts() {
-      if (!this.searchQuery) return this.scripts;
       const query = this.searchQuery.toLowerCase();
-      return this.scripts.filter(script => {
-        return (
+      let filtered = this.scripts.filter(script => {
+        // 搜索条件
+        const matchesSearch =
+          !this.searchQuery ||
           script.title.toLowerCase().includes(query) ||
           script.preview.toLowerCase().includes(query) ||
           (script.tags &&
-            script.tags.some(tag => tag.toLowerCase().includes(query)))
-        );
+            script.tags.some(tag => tag.toLowerCase().includes(query)));
+        // 分类过滤：除了 "全部"，均按 tags 判断
+        let matchesCategory = true;
+        if (this.selectedCategory !== '全部') {
+          matchesCategory =
+            script.tags && script.tags.includes(this.selectedCategory);
+        }
+        return matchesSearch && matchesCategory;
       });
+      return filtered;
     }
   },
   watch: {
@@ -119,5 +137,19 @@ export default {
 .script-list {
   max-height: 70vh; /* 高度可根据需要调整 */
   overflow-y: auto;
+}
+
+.el-tabs__header {
+  border-bottom: none;
+}
+
+.dialog-footer {
+  position: sticky;
+  bottom: 0;
+  background-color: #fff;
+  padding: 10px;
+  /* 可选：添加上边框，分隔视觉效果 */
+  border-top: 1px solid #ebeef5;
+  z-index: 100;
 }
 </style>
