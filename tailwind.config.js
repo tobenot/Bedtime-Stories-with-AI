@@ -43,6 +43,12 @@ module.exports = {
       },
     },
   },
+  variants: {
+    extend: {
+      // 允许 scrollbar 工具类使用 'rounded' 变体，可以让滚动条拇指使用圆角样式
+      scrollbar: ['rounded']
+    }
+  },
   plugins: [
     require('tailwindcss-scrollbar'),
     // 注册自定义小按钮组件
@@ -63,7 +69,7 @@ module.exports = {
       }
       addComponents(smallButtons)
     }),
-      // 注册图标按钮组件 (.btn-refresh, .btn-copy, .btn-delete, .btn-edit)
+    // 注册图标按钮组件 (.btn-refresh, .btn-copy, .btn-delete, .btn-edit)
     plugin(function({ addComponents, theme }) {
       const iconButton = {
         '.btn-refresh, .btn-copy, .btn-delete, .btn-edit': {  // 新增 .btn-edit
@@ -83,7 +89,6 @@ module.exports = {
         },
       }
       addComponents(iconButton)
-    }) 
+    }),
   ],
-
 } 

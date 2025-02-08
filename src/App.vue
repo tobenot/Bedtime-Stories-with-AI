@@ -2,13 +2,13 @@
 <template>
   <div class="app-container flex h-screen">
     <!-- 桌面版侧边栏 -->
-    <div class="sidebar w-82 hidden md:flex flex-col custom-scrollbar">
+    <div class="sidebar w-82 hidden md:flex flex-col scrollbar scrollbar-thumb-gray-500 scrollbar-track-gray-200">
       <div class="sidebar-header p-4 border-b">
         <el-button class="btn-primary w-full" @click="createNewChat">
           <el-icon><Plus /></el-icon> 新对话
         </el-button>
       </div>
-      <div class="chat-list flex-1 overflow-y-auto p-4 custom-scrollbar">
+      <div class="chat-list flex-1 overflow-y-auto p-4 scrollbar scrollbar-thumb-gray-500 scrollbar-track-gray-200">
         <ChatItem
           v-for="chat in chatHistory"
           :key="chat.id"
@@ -38,7 +38,7 @@
           <el-icon><Plus /></el-icon> 新对话
         </el-button>
       </div>
-      <div class="chat-list flex-1 overflow-y-auto p-4">
+      <div class="chat-list flex-1 overflow-y-auto p-4 scrollbar scrollbar-thumb-gray-500 scrollbar-track-gray-200">
         <ChatItem
           v-for="chat in chatHistory"
           :key="chat.id"
@@ -85,7 +85,7 @@
         </div>
       </div>
 
-      <el-main class="message-list flex-1 overflow-y-auto p-5 mt-16 md:mt-0 custom-scrollbar">
+      <el-main :class="['message-list', 'flex-1', 'overflow-y-auto', 'p-5', showSidebar ? 'mt-16' : 'mt-0', 'md:mt-0', 'scrollbar', 'scrollbar-thumb-gray-500', 'scrollbar-track-gray-200']">
         <template v-if="!apiKey">
           <div class="empty-state text-center p-5">
             <el-alert type="info" :closable="false" show-icon>
