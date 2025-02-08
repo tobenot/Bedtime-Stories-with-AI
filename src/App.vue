@@ -140,6 +140,11 @@
                 <el-button class="btn-delete" @click="confirmDeleteMessage(index)">
                   <el-icon style="font-size: 1.6rem;"><Delete /></el-icon>
                 </el-button>
+                <template v-if="index === currentChat.messages.length - 1 && !isTyping">
+                  <el-button class="btn-refresh" @click="sendMessage(true)">
+                    <el-icon style="font-size: 1.6rem;"><Refresh /></el-icon>
+                  </el-button>
+                </template>
               </div>
             </div>
             <template v-else>
