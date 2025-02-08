@@ -69,7 +69,7 @@
       <!-- 共用头部：无论桌面还是移动端都显示 -->
       <div class="header sticky top-0 z-50 flex items-center justify-between p-4 bg-primary text-white border-b border-primary-light">
         <!-- 仅移动端显示菜单按钮 -->
-        <button class="menu-button md:hidden text-white" @click="showSidebar = true">
+        <button class="menu-button md:hidden text-white" @click="toggleSidebar">
           <el-icon><Expand /></el-icon>
         </button>
         <div class="flex items-center gap-2">
@@ -337,16 +337,15 @@
       <div class="mt-1 text-gray-600 text-sm">
         从现象中推测，硅基流动在单次回复中超过五分钟就会直接截断，可能会导致正文不完整。如果你遇到类似问题，可以尝试让它精简思考长度。
       </div>
+      <br>
+      <div class="footer p-4 bg-white border-t text-center text-gray-600 text-sm">
+        <el-button type="text" @click="showAuthorInfo = true" class="ml-2">
+          <el-icon><InfoFilled /></el-icon>
+        </el-button>
+        作者: <a href="https://tobenot.top/" target="_blank" class="text-secondary hover:underline">tobenot</a> &amp; © 2025 父项目作者: <a href="https://www.huasheng.ai" target="_blank" class="text-secondary hover:underline">花生</a>
+      </div>
     </div>
   </el-drawer>
-
-  <!-- Footer -->
-  <div class="footer p-4 bg-white border-t text-center text-gray-600 text-sm">
-    <el-button type="text" @click="showAuthorInfo = true" class="ml-2">
-      <el-icon><InfoFilled /></el-icon>
-    </el-button>
-    作者: <a href="https://tobenot.top/" target="_blank" class="text-secondary hover:underline">tobenot</a> &amp; © 2025 父项目作者: <a href="https://www.huasheng.ai" target="_blank" class="text-secondary hover:underline">花生</a>
-  </div>
 
   <!-- 作者信息弹窗 -->
   <el-dialog
@@ -477,6 +476,12 @@ export default {
     }
     if (!this.currentChatId) {
       this.createNewChat()
+    }
+  },
+  watch: {
+    showSidebar(newVal) {
+      // 当侧边栏打开时禁止整个网页滚动，关闭时恢复
+      document.body.style.overflow = newVal ? 'hidden' : '';
     }
   },
   methods: {
@@ -999,6 +1004,9 @@ export default {
         chat.title = title;
         this.saveChatHistory();
       }
+    },
+    toggleSidebar() {
+      this.showSidebar = !this.showSidebar;
     }
   }
 }
