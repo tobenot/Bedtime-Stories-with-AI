@@ -132,9 +132,6 @@
                 <el-button class="btn-copy" @click="copyMessage(msg.content)">
                   <el-icon style="font-size: 1.6rem;"><CopyDocument /></el-icon>
                 </el-button>
-                <el-button class="btn-delete" @click="confirmDeleteMessage(index)">
-                  <el-icon style="font-size: 1.6rem;"><Delete /></el-icon>
-                </el-button>
                 <el-button class="btn-edit" @click="enableEditMessage(index)">
                   <el-icon style="font-size: 1.6rem;"><Edit /></el-icon>
                 </el-button>
@@ -143,6 +140,9 @@
                     <el-icon style="font-size: 1.6rem;"><Refresh /></el-icon>
                   </el-button>
                 </template>
+                <el-button class="btn-delete" @click="confirmDeleteMessage(index)">
+                  <el-icon style="font-size: 1.6rem;"><Delete /></el-icon>
+                </el-button>
               </div>
             </div>
             <template v-else>
@@ -169,13 +169,15 @@
                   <el-button class="btn-edit" @click="enableEditMessage(index)">
                     <el-icon style="font-size: 1.6rem;"><Edit /></el-icon>
                   </el-button>
-                  <el-button class="btn-delete" @click="confirmDeleteMessage(index)">
-                    <el-icon style="font-size: 1.6rem;"><Delete /></el-icon>
-                  </el-button>
                 </template>
                 <template v-if="index === currentChat.messages.length - 1 && !isTyping">
                   <el-button class="btn-refresh" @click="confirmRegenerateMessage">
                     <el-icon style="font-size: 1.6rem;"><Refresh /></el-icon>
+                  </el-button>
+                </template>
+                <template v-if="!(index === currentChat.messages.length - 1 && isTyping)">
+                  <el-button class="btn-delete" @click="confirmDeleteMessage(index)">
+                    <el-icon style="font-size: 1.6rem;"><Delete /></el-icon>
                   </el-button>
                 </template>
               </div>
