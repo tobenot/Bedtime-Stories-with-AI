@@ -156,8 +156,7 @@
                     </div>
                     <span class="font-bold">思考过程</span>
                   </div>
-                  <div class="reasoning-body" :class="{ collapsed: msg.isReasoningCollapsed }">
-                    {{ msg.reasoning_content }}
+                  <div class="reasoning-body" :class="{ collapsed: msg.isReasoningCollapsed }" v-html="renderMarkdown(msg.reasoning_content)">
                   </div>
                 </div>
               </template>
@@ -529,12 +528,12 @@ export default {
     },
     async sendMessage(isRegenerate = false) {
       if (isRegenerate) {
-        // 如果为重新生成，删除最后一条助手消息(仅当其角色为 assistant)
         if (!this.currentChat.messages.length) return;
         const lastMessage = this.currentChat.messages[this.currentChat.messages.length - 1];
-        if (lastMessage.role !== 'assistant') return;
-        this.currentChat.messages.pop();
-        this.saveChatHistory();
+        if (lastMessage.role === 'assistant') {
+          this.currentChat.messages.pop();
+          this.saveChatHistory();
+        }
       } else {
         if (!this.inputMessage.trim() || this.isLoading || !this.apiKey) return;
         var message = this.inputMessage.trim();
