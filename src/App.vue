@@ -287,6 +287,19 @@
             &nbsp;&nbsp;开启后，助手的思考过程将默认隐藏，点击图标可展开/折叠。
           </div>
         </el-form-item>
+
+        <!-- 新增自动折叠旧的思考过程设置项 -->
+        <el-form-item label="自动折叠">
+          <el-switch
+            v-model="autoCollapseReasoning"
+            active-color="#409EFF"
+            inactive-color="#dcdfe6"
+            @change="saveAutoCollapseReasoning"
+          ></el-switch>
+          <div class="mt-1 text-gray-600 text-sm">
+            &nbsp;&nbsp;开启后，每次发送新消息时，之前所有消息的思考过程将自动折叠。
+          </div>
+        </el-form-item>
       </el-form>
       <div class="mt-1 text-gray-600 text-sm">
         电脑端可以使用Ctrl+Enter发送消息
@@ -404,7 +417,8 @@ export default {
       showAuthorInfo: false,
       showScriptPanel: false,
       scripts: scripts,
-      defaultHideReasoning: JSON.parse(localStorage.getItem('default_hide_reasoning') || 'false')
+      defaultHideReasoning: JSON.parse(localStorage.getItem('default_hide_reasoning') || 'false'),
+      autoCollapseReasoning: JSON.parse(localStorage.getItem('auto_collapse_reasoning') || 'false')
     }
   },
   computed: {
@@ -433,6 +447,9 @@ export default {
     },
     saveDefaultHideReasoning() {
       localStorage.setItem('default_hide_reasoning', JSON.stringify(this.defaultHideReasoning));
+    },
+    saveAutoCollapseReasoning() {
+      localStorage.setItem('auto_collapse_reasoning', JSON.stringify(this.autoCollapseReasoning));
     },
     createNewChat() {
       const newChat = {
@@ -510,6 +527,15 @@ export default {
           timestamp: new Date().toISOString()
         };
         this.currentChat.messages.push(userMessage);
+      }
+
+      // 新增：如果启用了自动折叠，则折叠所有助手消息的思考过程
+      if (this.autoCollapseReasoning && !isRegenerate) {
+        this.currentChat.messages.forEach(msg => {
+          if (msg.role === 'assistant' && !msg.isReasoningCollapsed) {
+            msg.isReasoningCollapsed = true;
+          }
+        });
       }
 
       try {
