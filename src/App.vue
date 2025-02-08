@@ -137,6 +137,9 @@
                 <el-button class="btn-copy" @click="copyMessage(msg.content)">
                   <el-icon style="font-size: 1.6rem;"><CopyDocument /></el-icon>
                 </el-button>
+                <el-button class="btn-delete" @click="confirmDeleteMessage(index)">
+                  <el-icon style="font-size: 1.6rem;"><Delete /></el-icon>
+                </el-button>
               </div>
             </div>
             <template v-else>
@@ -156,7 +159,6 @@
                 </div>
               </template>
               <div class="markdown-content" v-html="renderMarkdown(msg.content)"></div>
-              <!-- 添加复制按钮（每个助手消息都有），以及重新生成按钮（仅最新消息显示） -->
               <div class="assistant-controls mt-2 flex gap-2 justify-start">
                 <el-button class="btn-copy" @click="copyMessage(msg.content)">
                   <el-icon style="font-size: 1.6rem;"><CopyDocument /></el-icon>
@@ -166,6 +168,9 @@
                     <el-icon style="font-size: 1.6rem;"><Refresh /></el-icon>
                   </el-button>
                 </template>
+                <el-button class="btn-delete" @click="confirmDeleteMessage(index)">
+                  <el-icon style="font-size: 1.6rem;"><Delete /></el-icon>
+                </el-button>
               </div>
             </template>
           </div>
@@ -366,7 +371,7 @@
 
 <script>
 import { marked } from 'marked';
-import { Refresh, CopyDocument } from '@element-plus/icons-vue';
+import { Refresh, CopyDocument, Delete } from '@element-plus/icons-vue';
 import html2pdf from 'html2pdf.js';
 import ChatItem from './components/ChatItem.vue';
 import ScriptSelector from './components/ScriptSelector.vue';
@@ -788,6 +793,26 @@ export default {
       if (url) {
         window.open(url, '_blank')
       }
+    },
+    confirmDeleteMessage(index) {
+      this.$confirm('确定删除这条消息吗？', '确认删除', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.deleteMessage(index);
+        this.$message({
+          message: '消息已删除',
+          type: 'success',
+          duration: 2000
+        });
+      }).catch(() => {
+        // 用户取消删除，不做任何操作
+      });
+    },
+    deleteMessage(index) {
+      this.currentChat.messages.splice(index, 1);
+      this.saveChatHistory();
     }
   }
 }

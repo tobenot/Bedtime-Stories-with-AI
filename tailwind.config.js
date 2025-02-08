@@ -63,10 +63,10 @@ module.exports = {
       }
       addComponents(smallButtons)
     }),
-    // 注册图标按钮组件 (.btn-refresh 和 .btn-copy)
+      // 注册图标按钮组件 (.btn-refresh, .btn-copy, .btn-delete)
     plugin(function({ addComponents, theme }) {
       const iconButton = {
-        '.btn-refresh, .btn-copy': {
+        '.btn-refresh, .btn-copy, .btn-delete': {  // 新增 .btn-delete
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -83,6 +83,7 @@ module.exports = {
         },
       }
       addComponents(iconButton)
-    })
+    }) 
   ],
+
 } 
