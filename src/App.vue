@@ -20,9 +20,6 @@
       
       <!-- 新增QQ群按钮使用自定义小按钮样式 -->
       <div class="qq-groups p-4 border-t mt-4">
-        <el-button class="btn-small w-full mb-2" @click="joinGroup('软件群')">
-          加入QQ群【与AI的睡前故事】
-        </el-button><br>
         <el-button class="btn-small w-full" @click="joinGroup('作者粉丝群')">
           加入QQ群【丶青萝卜的母港】
         </el-button>
@@ -53,9 +50,6 @@
       
       <!-- 移动端新增的QQ群按钮 -->
       <div class="qq-groups p-4 border-t mt-4">
-        <el-button class="btn-small w-full mb-2" @click="joinGroup('软件群')">
-          加入QQ群【与AI的睡前故事】
-        </el-button>
         <el-button class="btn-small w-full" @click="joinGroup('作者粉丝群')">
           加入QQ群【丶青萝卜的母港】
         </el-button>
