@@ -129,20 +129,28 @@
             <div v-if="msg.role === 'user'">
               <div v-html="renderMarkdown(msg.content)"></div>
               <div class="message-controls mt-2 flex gap-2 justify-start">
-                <el-button class="btn-copy" @click="copyMessage(msg.content)">
-                  <el-icon style="font-size: 1.6rem;"><CopyDocument /></el-icon>
-                </el-button>
-                <el-button class="btn-edit" @click="enableEditMessage(index)">
-                  <el-icon style="font-size: 1.6rem;"><Edit /></el-icon>
-                </el-button>
-                <template v-if="index === currentChat.messages.length - 1 && !isTyping">
-                  <el-button class="btn-refresh" @click="confirmRegenerateMessage">
-                    <el-icon style="font-size: 1.6rem;"><Refresh /></el-icon>
+                <el-tooltip content="复制" placement="top">
+                  <el-button class="btn-copy" @click="copyMessage(msg.content)">
+                    <el-icon style="font-size: 1.6rem;"><CopyDocument /></el-icon>
                   </el-button>
+                </el-tooltip>
+                <el-tooltip content="编辑" placement="top">
+                  <el-button class="btn-edit" @click="enableEditMessage(index)">
+                    <el-icon style="font-size: 1.6rem;"><Edit /></el-icon>
+                  </el-button>
+                </el-tooltip>
+                <template v-if="index === currentChat.messages.length - 1 && !isTyping">
+                  <el-tooltip content="重新生成" placement="top">
+                    <el-button class="btn-refresh" @click="confirmRegenerateMessage">
+                      <el-icon style="font-size: 1.6rem;"><Refresh /></el-icon>
+                    </el-button>
+                  </el-tooltip>
                 </template>
-                <el-button class="btn-delete" @click="confirmDeleteMessage(index)">
-                  <el-icon style="font-size: 1.6rem;"><Delete /></el-icon>
-                </el-button>
+                <el-tooltip content="删除" placement="top">
+                  <el-button class="btn-delete" @click="confirmDeleteMessage(index)">
+                    <el-icon style="font-size: 1.6rem;"><Delete /></el-icon>
+                  </el-button>
+                </el-tooltip>
               </div>
             </div>
             <template v-else>
@@ -162,23 +170,31 @@
               </template>
               <div class="markdown-content" v-html="renderMarkdown(msg.content)"></div>
               <div class="assistant-controls mt-2 flex gap-2 justify-start">
-                <el-button class="btn-copy" @click="copyMessage(msg.content)">
-                  <el-icon style="font-size: 1.6rem;"><CopyDocument /></el-icon>
-                </el-button>
-                <template v-if="!(index === currentChat.messages.length - 1 && isTyping)">
-                  <el-button class="btn-edit" @click="enableEditMessage(index)">
-                    <el-icon style="font-size: 1.6rem;"><Edit /></el-icon>
+                <el-tooltip content="复制" placement="top">
+                  <el-button class="btn-copy" @click="copyMessage(msg.content)">
+                    <el-icon style="font-size: 1.6rem;"><CopyDocument /></el-icon>
                   </el-button>
+                </el-tooltip>
+                <template v-if="!(index === currentChat.messages.length - 1 && isTyping)">
+                  <el-tooltip content="编辑" placement="top">
+                    <el-button class="btn-edit" @click="enableEditMessage(index)">
+                      <el-icon style="font-size: 1.6rem;"><Edit /></el-icon>
+                    </el-button>
+                  </el-tooltip>
                 </template>
                 <template v-if="index === currentChat.messages.length - 1 && !isTyping">
-                  <el-button class="btn-refresh" @click="confirmRegenerateMessage">
-                    <el-icon style="font-size: 1.6rem;"><Refresh /></el-icon>
-                  </el-button>
+                  <el-tooltip content="重新生成" placement="top">
+                    <el-button class="btn-refresh" @click="confirmRegenerateMessage">
+                      <el-icon style="font-size: 1.6rem;"><Refresh /></el-icon>
+                    </el-button>
+                  </el-tooltip>
                 </template>
                 <template v-if="!(index === currentChat.messages.length - 1 && isTyping)">
-                  <el-button class="btn-delete" @click="confirmDeleteMessage(index)">
-                    <el-icon style="font-size: 1.6rem;"><Delete /></el-icon>
-                  </el-button>
+                  <el-tooltip content="删除" placement="top">
+                    <el-button class="btn-delete" @click="confirmDeleteMessage(index)">
+                      <el-icon style="font-size: 1.6rem;"><Delete /></el-icon>
+                    </el-button>
+                  </el-tooltip>
                 </template>
               </div>
             </template>
