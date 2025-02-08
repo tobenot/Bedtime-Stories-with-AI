@@ -144,4 +144,23 @@
 }
 .btn-small:hover {
   @apply bg-primary-dark;
+}
+
+/* 修改：统一 Markdown 内容和思考过程的列表样式 */
+.markdown-content ul,
+.markdown-content ol,
+.reasoning-body ul,
+.reasoning-body ol {
+  list-style: initial;
+  margin-left: 1.25rem;  /* 根据需要调整缩进 */
+}
+
+.markdown-content ul,
+.reasoning-body ul {
+  list-style-type: disc;
+}
+
+.markdown-content ol,
+.reasoning-body ol {
+  list-style-type: decimal;
 } 
