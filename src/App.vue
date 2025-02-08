@@ -139,7 +139,7 @@
                   <el-icon style="font-size: 1.6rem;"><Edit /></el-icon>
                 </el-button>
                 <template v-if="index === currentChat.messages.length - 1 && !isTyping">
-                  <el-button class="btn-refresh" @click="sendMessage(true)">
+                  <el-button class="btn-refresh" @click="confirmRegenerateMessage">
                     <el-icon style="font-size: 1.6rem;"><Refresh /></el-icon>
                   </el-button>
                 </template>
@@ -165,17 +165,19 @@
                 <el-button class="btn-copy" @click="copyMessage(msg.content)">
                   <el-icon style="font-size: 1.6rem;"><CopyDocument /></el-icon>
                 </el-button>
-                <el-button class="btn-edit" @click="enableEditMessage(index)">
-                  <el-icon style="font-size: 1.6rem;"><Edit /></el-icon>
-                </el-button>
+                <template v-if="!(index === currentChat.messages.length - 1 && isTyping)">
+                  <el-button class="btn-edit" @click="enableEditMessage(index)">
+                    <el-icon style="font-size: 1.6rem;"><Edit /></el-icon>
+                  </el-button>
+                  <el-button class="btn-delete" @click="confirmDeleteMessage(index)">
+                    <el-icon style="font-size: 1.6rem;"><Delete /></el-icon>
+                  </el-button>
+                </template>
                 <template v-if="index === currentChat.messages.length - 1 && !isTyping">
-                  <el-button class="btn-refresh" @click="sendMessage(true)">
+                  <el-button class="btn-refresh" @click="confirmRegenerateMessage">
                     <el-icon style="font-size: 1.6rem;"><Refresh /></el-icon>
                   </el-button>
                 </template>
-                <el-button class="btn-delete" @click="confirmDeleteMessage(index)">
-                  <el-icon style="font-size: 1.6rem;"><Delete /></el-icon>
-                </el-button>
               </div>
             </template>
             <template v-if="msg.isEditing">
@@ -879,6 +881,17 @@ export default {
     cancelEditMessage(index) {
       this.currentChat.messages[index].isEditing = false;
       delete this.currentChat.messages[index].editContent;
+    },
+    confirmRegenerateMessage() {
+      this.$confirm('确定重新生成这条消息吗？目前这里与官方APP不一样，此操作将永久删除当前消息。', '确认重新生成', {
+        confirmButtonText: '重新生成',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.sendMessage(true);
+      }).catch(() => {
+        // 用户取消重新生成操作，不做任何处理
+      });
     }
   }
 }
