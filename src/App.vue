@@ -131,7 +131,14 @@
             :key="index" 
             class="message-bubble" 
             :class="msg.role === 'user' ? 'user-message' : 'assistant-message'">
-            <div v-if="msg.role === 'user'" v-html="renderMarkdown(msg.content)"></div>
+            <div v-if="msg.role === 'user'">
+              <div v-html="renderMarkdown(msg.content)"></div>
+              <div class="message-controls mt-2 flex gap-2 justify-start">
+                <el-button class="btn-copy" @click="copyMessage(msg.content)">
+                  <el-icon style="font-size: 1.6rem;"><CopyDocument /></el-icon>
+                </el-button>
+              </div>
+            </div>
             <template v-else>
               <template v-if="msg.reasoning_content">
                 <div class="reasoning-content bg-reasoningBg text-white p-2 rounded mb-2">
