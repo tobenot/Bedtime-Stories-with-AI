@@ -10,11 +10,11 @@
           <span class="chat-item-title flex-1" @click="$emit('switch', chat.id)">
             {{ chat.title || '新对话' }}
           </span>
-          <el-button type="text" size="small" @click.stop="startEditing">
-            <el-icon :class="active ? 'text-white' : 'text-secondary'">
-              <Edit />
-            </el-icon>
-          </el-button>
+          <el-tooltip content="重命名" placement="top">
+            <el-button type="text" size="small" @click.stop="startEditing">
+              <el-icon :class="active ? 'text-white' : 'text-secondary'"><Edit /></el-icon>
+            </el-button>
+          </el-tooltip>
         </template>
         <template v-else>
           <el-input
@@ -27,14 +27,15 @@
         </template>
       </div>
       <!-- 删除按钮 -->
-      <el-button 
-        type="text" 
-        class="opacity-60 hover:opacity-100 transition-opacity"
-        @click.stop="confirmDelete"
-      >
-        <!-- 统一未激活时使用辅助色 -->
-        <el-icon :class="active ? 'text-white' : 'text-secondary'"><Delete /></el-icon>
-      </el-button>
+      <el-tooltip content="删除" placement="top">
+        <el-button 
+          type="text" 
+          class="opacity-60 hover:opacity-100 transition-opacity"
+          @click.stop="confirmDelete"
+        >
+          <el-icon :class="active ? 'text-white' : 'text-secondary'"><Delete /></el-icon>
+        </el-button>
+      </el-tooltip>
     </div>
   </template>
 <script>
