@@ -4,10 +4,28 @@
       :class="active ? 'bg-primary text-white shadow-md' : 'bg-gray-50 text-primary hover:bg-primary/10 transition-colors'"
     >
       <el-icon :class="active ? 'text-white' : 'text-secondary'"><ChatRound /></el-icon>
-      <!-- 点击标题切换对话 -->
-      <span class="chat-item-title flex-1" @click="$emit('switch', chat.id)">
-        {{ chat.title || '新对话' }}
-      </span>
+      <!-- 新增：标题与编辑区域 -->
+      <div class="flex-1 flex items-center gap-2">
+        <template v-if="!isEditing">
+          <span class="chat-item-title flex-1" @click="$emit('switch', chat.id)">
+            {{ chat.title || '新对话' }}
+          </span>
+          <el-button type="text" size="small" @click.stop="startEditing">
+            <el-icon :class="active ? 'text-white' : 'text-secondary'">
+              <Edit />
+            </el-icon>
+          </el-button>
+        </template>
+        <template v-else>
+          <el-input
+            v-model="editTitle"
+            size="small"
+            class="flex-1"
+            @keyup.enter="saveTitle"
+            @blur="saveTitle"
+          />
+        </template>
+      </div>
       <!-- 删除按钮 -->
       <el-button 
         type="text" 
@@ -21,13 +39,14 @@
   </template>
 <script>
 import { ElMessageBox } from 'element-plus'
-import { ChatRound, Delete } from '@element-plus/icons-vue'
+import { ChatRound, Delete, Edit } from '@element-plus/icons-vue'
 
 export default {
   name: 'ChatItem',
   components: {
     ChatRound,
-    Delete
+    Delete,
+    Edit
   },
   props: {
     chat: {
@@ -41,7 +60,8 @@ export default {
   },
   data() {
     return {
-      // 删除了与重命名功能相关的状态
+      isEditing: false,
+      editTitle: ''
     }
   },
   watch: {
@@ -63,6 +83,23 @@ export default {
           console.log('User canceled delete')
           // 用户取消删除，不做处理
         })
+    },
+    startEditing() {
+      this.editTitle = this.chat.title;
+      this.isEditing = true;
+    },
+    saveTitle() {
+      if (this.editTitle.trim() === '') {
+        this.$message({
+          message: '标题不能为空',
+          type: 'warning',
+          duration: 2000
+        });
+        this.editTitle = this.chat.title;
+      } else if (this.editTitle !== this.chat.title) {
+        this.$emit('update-title', { id: this.chat.id, title: this.editTitle });
+      }
+      this.isEditing = false;
     }
   }
 }

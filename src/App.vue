@@ -2,7 +2,7 @@
 <template>
   <div class="app-container flex h-screen">
     <!-- 桌面版侧边栏 -->
-    <div class="sidebar w-64 hidden md:flex flex-col custom-scrollbar">
+    <div class="sidebar w-82 hidden md:flex flex-col custom-scrollbar">
       <div class="sidebar-header p-4 border-b">
         <el-button class="btn-primary w-full" @click="createNewChat">
           <el-icon><Plus /></el-icon> 新对话
@@ -16,20 +16,20 @@
           :active="currentChatId === chat.id"
           @switch="switchChat"
           @delete="deleteChat"
+          @update-title="changeChatTitle"
         />
       </div>
       
-      <!-- 新增QQ群按钮使用自定义小按钮样式 -->
       <div class="qq-groups p-4 border-t mt-4">
         <el-button class="btn-small w-full" @click="joinGroup('作者粉丝群')">
-          加入QQ群【丶青萝卜的母港】
+          加入交流群【丶青萝卜的母港】
         </el-button>
       </div>
     </div>
 
     <!-- 移动端侧边栏 -->
     <div
-      class="sidebar fixed left-0 w-64 bg-gray-50 border-r flex flex-col md:hidden z-50 top-16 bottom-0"
+      class="sidebar fixed left-0 w-82 bg-gray-50 border-r flex flex-col md:hidden z-50 top-16 bottom-0"
       v-if="showSidebar"
     >
       <!-- 侧边栏内容保持不变 -->
@@ -46,13 +46,13 @@
           :active="currentChatId === chat.id"
           @switch="mobileSwitch"
           @delete="deleteChat"
+          @update-title="changeChatTitle"
         />
       </div>
       
-      <!-- 移动端新增的QQ群按钮 -->
       <div class="qq-groups p-4 border-t mt-4">
         <el-button class="btn-small w-full" @click="joinGroup('作者粉丝群')">
-          加入QQ群【丶青萝卜的母港】
+          加入交流群【丶青萝卜的母港】
         </el-button>
       </div>
     </div>
@@ -992,6 +992,13 @@ export default {
       reader.readAsText(file);
       // 清空文件输入，以便下次可选相同文件
       event.target.value = '';
+    },
+    changeChatTitle({ id, title }) {
+      const chat = this.chatHistory.find(c => c.id === id);
+      if (chat) {
+        chat.title = title;
+        this.saveChatHistory();
+      }
     }
   }
 }
