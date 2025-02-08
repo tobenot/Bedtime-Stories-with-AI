@@ -319,6 +319,17 @@
             &nbsp;&nbsp;开启后，每次发送新消息时，之前所有消息的思考过程将自动折叠。
           </div>
         </el-form-item>
+
+        <!-- 新增：对话存档导入导出功能 -->
+        <el-divider></el-divider>
+        <el-form-item label="对话存档">
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <el-button size="small" @click="exportChatArchive">导出存档</el-button>
+            <el-button size="small" type="primary" @click="importChatArchive('merge')">导入存档（合并）</el-button>
+            <el-button size="small" type="danger" @click="importChatArchive('overwrite')">导入存档（覆盖）</el-button>
+          </div>
+        </el-form-item>
+        <!-- 结束对话存档功能区 -->
       </el-form>
       <div class="mt-1 text-gray-600 text-sm">
         电脑端可以使用Ctrl+Enter发送消息
@@ -399,6 +410,15 @@
 
   <!-- 引入剧本选择组件 -->
   <ScriptSelector v-model="showScriptPanel" :scripts="scripts" @script-selected="selectScript" />
+
+  <!-- 新增：隐藏的文件上传控件，用于导入存档 -->
+  <input
+    type="file"
+    ref="importFile"
+    style="display: none;"
+    accept=".json"
+    @change="handleImportFile"
+  />
 </template>
 
 <script>
@@ -438,7 +458,8 @@ export default {
       scripts: scripts,
       defaultHideReasoning: JSON.parse(localStorage.getItem('default_hide_reasoning') || 'false'),
       autoCollapseReasoning: JSON.parse(localStorage.getItem('auto_collapse_reasoning') || 'false'),
-      editingMessageIndex: null
+      editingMessageIndex: null,
+      importMode: null
     }
   },
   computed: {
@@ -892,6 +913,85 @@ export default {
       }).catch(() => {
         // 用户取消重新生成操作，不做任何处理
       });
+    },
+    exportChatArchive() {
+      try {
+        const jsonData = JSON.stringify(this.chatHistory, null, 2);
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat_history_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.$message({
+          message: '存档已导出',
+          type: 'success',
+          duration: 2000
+        });
+      } catch (error) {
+        this.$message({
+          message: '导出存档失败',
+          type: 'error',
+          duration: 2000
+        });
+      }
+    },
+    importChatArchive(mode) {
+      // mode 为 "merge" 或 "overwrite"
+      this.importMode = mode;
+      this.$refs.importFile.click();
+    },
+    handleImportFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        let importedData = null;
+        try {
+          importedData = JSON.parse(e.target.result);
+          // 检查导入的数据是否为数组格式
+          if (!Array.isArray(importedData)) {
+            throw new Error('导入文件格式错误，应该为聊天历史数组');
+          }
+        } catch (err) {
+          this.$message({
+            message: '无法解析文件，请确认文件格式正确。',
+            type: 'error',
+            duration: 2000
+          });
+          return;
+        }
+        if (this.importMode === 'overwrite') {
+          // 覆盖：用导入的数据替换现有存档
+          this.chatHistory = importedData;
+          if (this.chatHistory.length > 0) {
+            this.currentChatId = this.chatHistory[0].id;
+          } else {
+            this.createNewChat();
+          }
+          this.$message({
+            message: '存档已覆盖',
+            type: 'success',
+            duration: 2000
+          });
+        } else if (this.importMode === 'merge') {
+          // 合并：将导入的存档与现有存档合并
+          this.chatHistory = importedData.concat(this.chatHistory);
+          if (!this.currentChatId && this.chatHistory.length > 0) {
+            this.currentChatId = this.chatHistory[0].id;
+          }
+          this.$message({
+            message: '存档已合并',
+            type: 'success',
+            duration: 2000
+          });
+        }
+        this.saveChatHistory();
+      };
+      reader.readAsText(file);
+      // 清空文件输入，以便下次可选相同文件
+      event.target.value = '';
     }
   }
 }
