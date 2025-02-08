@@ -1,3 +1,4 @@
+<!-- 是Vue3！！ -->
 <template>
   <div class="app-container flex h-screen">
     <!-- 桌面版侧边栏 -->
@@ -134,6 +135,9 @@
                 <el-button class="btn-delete" @click="confirmDeleteMessage(index)">
                   <el-icon style="font-size: 1.6rem;"><Delete /></el-icon>
                 </el-button>
+                <el-button class="btn-edit" @click="enableEditMessage(index)">
+                  <el-icon style="font-size: 1.6rem;"><Edit /></el-icon>
+                </el-button>
                 <template v-if="index === currentChat.messages.length - 1 && !isTyping">
                   <el-button class="btn-refresh" @click="sendMessage(true)">
                     <el-icon style="font-size: 1.6rem;"><Refresh /></el-icon>
@@ -162,6 +166,9 @@
                 <el-button class="btn-copy" @click="copyMessage(msg.content)">
                   <el-icon style="font-size: 1.6rem;"><CopyDocument /></el-icon>
                 </el-button>
+                <el-button class="btn-edit" @click="enableEditMessage(index)">
+                  <el-icon style="font-size: 1.6rem;"><Edit /></el-icon>
+                </el-button>
                 <template v-if="index === currentChat.messages.length - 1 && !isTyping">
                   <el-button class="btn-refresh" @click="sendMessage(true)">
                     <el-icon style="font-size: 1.6rem;"><Refresh /></el-icon>
@@ -170,6 +177,18 @@
                 <el-button class="btn-delete" @click="confirmDeleteMessage(index)">
                   <el-icon style="font-size: 1.6rem;"><Delete /></el-icon>
                 </el-button>
+              </div>
+            </template>
+            <template v-if="msg.isEditing">
+              <el-input
+                v-model="msg.editContent"
+                type="textarea"
+                :autosize="{ minRows: 2, maxRows: 10 }"
+                placeholder="编辑消息内容..."
+              ></el-input>
+              <div class="edit-controls mt-2 flex gap-2">
+                <el-button type="primary" @click="saveEditedMessage(index)">保存</el-button>
+                <el-button @click="cancelEditMessage(index)">取消</el-button>
               </div>
             </template>
           </div>
@@ -383,7 +402,7 @@
 
 <script>
 import { marked } from 'marked';
-import { Refresh, CopyDocument, Delete } from '@element-plus/icons-vue';
+import { Refresh, CopyDocument, Delete, Edit } from '@element-plus/icons-vue';
 import html2pdf from 'html2pdf.js';
 import ChatItem from './components/ChatItem.vue';
 import ScriptSelector from './components/ScriptSelector.vue';
@@ -417,7 +436,8 @@ export default {
       showScriptPanel: false,
       scripts: scripts,
       defaultHideReasoning: JSON.parse(localStorage.getItem('default_hide_reasoning') || 'false'),
-      autoCollapseReasoning: JSON.parse(localStorage.getItem('auto_collapse_reasoning') || 'false')
+      autoCollapseReasoning: JSON.parse(localStorage.getItem('auto_collapse_reasoning') || 'false'),
+      editingMessageIndex: null
     }
   },
   computed: {
@@ -838,6 +858,28 @@ export default {
     deleteMessage(index) {
       this.currentChat.messages.splice(index, 1);
       this.saveChatHistory();
+    },
+    enableEditMessage(index) {
+      this.currentChat.messages[index].isEditing = true;
+      this.currentChat.messages[index].editContent = this.currentChat.messages[index].content;
+    },
+    saveEditedMessage(index) {
+      const editedContent = this.currentChat.messages[index].editContent.trim();
+      if (editedContent) {
+        this.currentChat.messages[index].content = editedContent;
+        this.currentChat.messages[index].isEditing = false;
+        this.saveChatHistory();
+      } else {
+        this.$message({
+          message: '消息内容不能为空',
+          type: 'warning',
+          duration: 2000
+        });
+      }
+    },
+    cancelEditMessage(index) {
+      this.currentChat.messages[index].isEditing = false;
+      delete this.currentChat.messages[index].editContent;
     }
   }
 }
