@@ -974,15 +974,30 @@ export default {
       delete this.currentChat.messages[index].editContent;
     },
     confirmRegenerateMessage() {
-      this.$confirm('确定重新生成这条消息吗？目前这里与官方APP不一样，此操作将永久删除当前消息。', '确认重新生成', {
-        confirmButtonText: '重新生成',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
+      const messages = this.currentChat && this.currentChat.messages ? this.currentChat.messages : [];
+      if (messages.length === 0) return;
+      const lastMessage = messages[messages.length - 1];
+      // 如果最后一条消息是用户消息，则直接重新生成，不需要二次确认
+      if (lastMessage.role === 'user') {
         this.sendMessage(true);
-      }).catch(() => {
-        // 用户取消重新生成操作，不做任何处理
-      });
+        return;
+      }
+      // 如果为助手消息，则弹出确认对话框
+      this.$confirm(
+        '确定重新生成这条消息吗？目前这里与官方APP不一样，此操作将永久删除当前消息。',
+        '确认重新生成',
+        {
+          confirmButtonText: '重新生成',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }
+      )
+        .then(() => {
+          this.sendMessage(true);
+        })
+        .catch(() => {
+          // 用户取消重新生成操作，不做任何处理
+        });
     },
     exportChatArchive() {
       try {
