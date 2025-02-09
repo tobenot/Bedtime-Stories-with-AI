@@ -128,7 +128,7 @@
             :class="msg.role === 'user' ? 'user-message' : 'assistant-message'">
             <div v-if="msg.role === 'user'">
               <div v-html="renderMarkdown(msg.content)"></div>
-              <div class="message-controls mt-2 flex gap-2 justify-start">
+              <div class="message-controls mt-2 flex justify-start">
                 <el-tooltip content="复制" placement="top">
                   <el-button class="btn-copy" @click="copyMessage(msg.content)">
                     <el-icon style="font-size: 1.6rem;"><CopyDocument /></el-icon>
@@ -169,7 +169,7 @@
                 </div>
               </template>
               <div class="markdown-content" v-html="renderMarkdown(msg.content)"></div>
-              <div class="assistant-controls mt-2 flex gap-2 justify-start">
+              <div class="assistant-controls mt-2 flex justify-start">
                 <el-tooltip content="复制" placement="top">
                   <el-button class="btn-copy" @click="copyMessage(msg.content)">
                     <el-icon style="font-size: 1.6rem;"><CopyDocument /></el-icon>
@@ -205,7 +205,7 @@
                 :autosize="{ minRows: 2, maxRows: 10 }"
                 placeholder="编辑消息内容..."
               ></el-input>
-              <div class="edit-controls mt-2 flex gap-2">
+              <div class="edit-controls mt-2 flex justify-start">
                 <el-button type="primary" @click="saveEditedMessage(index)">保存</el-button>
                 <el-button @click="cancelEditMessage(index)">取消</el-button>
               </div>
