@@ -289,9 +289,17 @@
 
         <!-- 新增温度设置项 -->
         <el-form-item label="温度">
-          <el-slider class="custom-slider" v-model="temperature" :min="0" :max="1" :step="0.1" show-tooltip></el-slider>
+          <el-slider
+            class="custom-slider"
+            v-model="temperature"
+            :min="0"
+            :max="1"
+            :step="0.1"
+            show-tooltip
+            @change="saveTemperature"
+          ></el-slider>
           <div class="mt-1 text-gray-600 text-sm">
-            温度参数决定回答的随机性。较低的温度（如0.3）使回答更确定，而较高的温度（如0.7）则使回答更具创造性和随机性。
+            温度参数决定回答的随机性。较低的温度（如0.3）使回答更确定，而较高的温度（如0.7）则使回答更具创造性和随机性。玩文游建议0.7，你可以进行尝试。
           </div>
         </el-form-item>
 
@@ -461,7 +469,9 @@ export default {
         'deepseek-ai/DeepSeek-V3',
         'meta-llama/Llama-3.3-70B-Instruct'
       ],
-      temperature: 1,
+      temperature: localStorage.getItem('temperature')
+        ? parseFloat(localStorage.getItem('temperature'))
+        : 0.7,
       isLoading: false,
       isTyping: false,
       errorMessage: '',
@@ -1025,6 +1035,9 @@ export default {
     },
     toggleSidebar() {
       this.showSidebar = !this.showSidebar;
+    },
+    saveTemperature() {
+      localStorage.setItem('temperature', this.temperature.toString());
     }
   }
 }
