@@ -33,6 +33,15 @@ export default [
     tags: ['AI生成', 'DND', '模组', '奇幻', '冒险', '角色扮演', '盲盒', '跑团', '基础', '最新'],
   },
   {
+    id: 800002,
+    title: '修仙奇缘',
+    preview: '踏入修仙世界，开启家族传承之路',
+    content: `来模拟修仙世界吧，1.我现在7岁，出生在武学世家，我家族正准备教我家传剑法和心法，你要在发言结尾生成UI 2.现在这只是模拟世界中的一个场景，这个家还有很多地方可供选择，离开家还有很多地方可以去，你需要模拟这个虚拟的世界和其中除我以外的所有角色，现在开始模拟`,
+    tags: ['武侠', '修仙', '冒险', '传承', '白雾山岗总有蜘蛛网', '小红书','人工', '基础', '最新'],
+    authorLink: 'https://www.xiaohongshu.com/discovery/item/67a72b50000000002903f250?source=webshare&xhsshare=pc_web&xsec_token=ABcm3zeCSSpYTnZNw2dBHuMbApoCUKy4V7lVZ6GavQZyE=&xsec_source=pc_share',
+    authorName: '白雾山岗总有蜘蛛网'
+  },
+  {
     id: 100002,
     title: '艾瑞尔大陆的冒险',
     preview: '无预设身份，开启寻找失落王国的自由奇幻冒险之旅！',
