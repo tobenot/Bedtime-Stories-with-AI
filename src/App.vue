@@ -709,20 +709,57 @@ export default {
       }
     },
     async copyMessage(content) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(content);
+          this.$message({
+            message: '复制成功',
+            type: 'success',
+            duration: 2000
+          });
+        } catch (err) {
+          // 出现错误时尝试回退复制方案
+          this.fallbackCopy(content);
+        }
+      } else {
+        // 如果浏览器不支持 Clipboard API，使用回退复制方案
+        this.fallbackCopy(content);
+      }
+    },
+    // 新增 fallbackCopy 方法，采用 document.execCommand 方式复制
+    fallbackCopy(content) {
+      const textarea = document.createElement('textarea');
+      textarea.value = content;
+      // 隐藏 textarea 并避免页面滚动
+      textarea.style.position = 'fixed';
+      textarea.style.top = '-9999px';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
       try {
-        await navigator.clipboard.writeText(content);
+        const successful = document.execCommand('copy');
+        if (successful) {
+          this.$message({
+            message: '复制成功',
+            type: 'success',
+            duration: 2000
+          });
+        } else {
+          this.$message({
+            message: '复制失败，请手动复制或使用编辑功能然后全选复制',
+            type: 'error',
+            duration: 2000
+          });
+        }
+      } catch (error) {
         this.$message({
-          message: '复制成功',
-          type: 'success',
-          duration: 2000
-        });
-      } catch (err) {
-        this.$message({
-          message: '复制失败，请手动复制',
+          message: '复制失败，请手动复制或使用编辑功能然后全选复制',
           type: 'error',
           duration: 2000
         });
       }
+      document.body.removeChild(textarea);
     },
     async exportToPDF() {
       try {
