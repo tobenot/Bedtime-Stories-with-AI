@@ -282,8 +282,28 @@
             请前往&nbsp;
             <a href="https://cloud.siliconflow.cn/i/M9KJQRfy" target="_blank" class="text-secondary underline">
               硅基流动 
-            </a>
-            &nbsp;获取。输入后将安全地存储在您的浏览器中。
+            </a>&nbsp;获取。输入后将安全地存储在您的浏览器中。
+          </div>
+        </el-form-item>
+
+        <!-- 新增 API 接口设置 -->
+        <el-form-item label="API 接口">
+          <el-select
+            v-model="apiUrl"
+            filterable
+            allow-create
+            placeholder="请选择或输入API接口"
+            @change="saveApiUrl"
+          >
+            <el-option
+              v-for="option in apiUrlOptions"
+              :key="option"
+              :label="option"
+              :value="option"
+            />
+          </el-select>
+          <div class="mt-1 text-gray-600 text-sm">
+            {{ apiUrlHint }}
           </div>
         </el-form-item>
 
@@ -486,12 +506,36 @@ export default {
       defaultHideReasoning: JSON.parse(localStorage.getItem('default_hide_reasoning') || 'false'),
       autoCollapseReasoning: JSON.parse(localStorage.getItem('auto_collapse_reasoning') || 'false'),
       editingMessageIndex: null,
-      importMode: null
+      importMode: null,
+      apiUrl: localStorage.getItem('api_url') || 'https://api.siliconflow.cn/v1/chat/completions',
+      apiUrlOptions: [
+        'https://api.siliconflow.cn/v1/chat/completions', // 对应硅基流动Key
+        'https://api.deepseek.com/v1/chat/completions'               // 对应Deepseek官方Key
+      ],
     }
   },
   computed: {
     currentChat() {
       return this.chatHistory.find(chat => chat.id === this.currentChatId)
+    },
+    apiUrlHint() {
+      if (this.apiUrl === 'https://api.siliconflow.cn/v1/chat/completions') {
+        return '当前选择的是硅基流动接口 请使用硅基流动的Key: https://cloud.siliconflow.cn/account/ak';
+      } else if (this.apiUrl === 'https://api.deepseek.com/v1/chat/completions') {
+        return '注意，Deepseek 官方接口 还并未支持，请勿使用。官方接口写起来有点麻烦）';
+      } else {
+        return '';
+      }
+    },
+    effectiveModel() {
+      if (this.apiUrl === 'https://api.deepseek.com/v1/chat/completions') {
+        if (this.model === 'deepseek-ai/DeepSeek-R1') {
+          return 'deepseek-reasoner';
+        } else if (this.model === 'deepseek-ai/DeepSeek-V3') {
+          return 'deepseek-chat';
+        }
+      }
+      return this.model;
     }
   },
   created() {
@@ -515,6 +559,9 @@ export default {
   methods: {
     saveApiKey() {
       localStorage.setItem('deepseek_api_key', this.apiKey)
+    },
+    saveApiUrl() {
+      localStorage.setItem('api_url', this.apiUrl);
     },
     saveModel() {
       localStorage.setItem('model', this.model)
@@ -584,12 +631,14 @@ export default {
     },
     async sendMessage(isRegenerate = false) {
       if (isRegenerate) {
-        if (!this.currentChat.messages.length) return;
-        const lastMessage = this.currentChat.messages[this.currentChat.messages.length - 1];
-        if (lastMessage.role === 'assistant') {
+        // 确保最后一条消息为用户消息。如果不是，则移除所有助手消息
+        while (
+          this.currentChat.messages.length > 0 &&
+          this.currentChat.messages[this.currentChat.messages.length - 1].role !== 'user'
+        ) {
           this.currentChat.messages.pop();
-          this.saveChatHistory();
         }
+        this.saveChatHistory();
       } else {
         if (!this.inputMessage.trim() || this.isLoading || !this.apiKey) return;
         var message = this.inputMessage.trim();
@@ -627,7 +676,7 @@ export default {
         this.currentChat.messages.push(assistantMessage);
 
         const requestBody = {
-          model: this.model,
+          model: this.effectiveModel,
           messages: this.currentChat.messages.map(msg => ({
             role: msg.role,
             content: msg.content
@@ -637,7 +686,7 @@ export default {
           max_tokens: 4096
         };
 
-        const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
+        const response = await fetch(this.apiUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
