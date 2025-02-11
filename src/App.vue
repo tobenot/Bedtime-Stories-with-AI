@@ -485,6 +485,7 @@ import html2pdf from 'html2pdf.js';
 import ChatItem from './components/ChatItem.vue';
 import ScriptSelector from './components/ScriptSelector.vue';
 import scripts from './config/scripts.js';
+import { exportChatToPDF } from './utils/pdfExporter';
 
 export default {
   components: {
@@ -848,133 +849,20 @@ export default {
     },
     async exportToPDF() {
       try {
-        const tempDiv = document.createElement('div');
-        tempDiv.className = 'export-content';
-        
-        tempDiv.innerHTML = `
-          <h1 class="mb-2">${this.currentChat.title || '聊天记录'}</h1>
-          <div class="mb-5 text-customGray">
-            创建时间：${new Date(this.currentChat.createdAt).toLocaleString('zh-CN')}
-          </div>
-        `;
-        
-        this.currentChat.messages.forEach(msg => {
-          const messageDiv = document.createElement('div');
-          messageDiv.classList.add('my-4', 'p-4', 'border', 'border-gray-200', 'page-break-avoid');
-          
-          const headerDiv = document.createElement('div');
-          headerDiv.classList.add('mb-2', 'flex', 'justify-between');
-          
-          const roleSpan = document.createElement('span');
-          roleSpan.classList.add('font-bold');
-          roleSpan.textContent = msg.role === 'user' ? '用户' : this.model;
-          headerDiv.appendChild(roleSpan);
-          
-          const timeSpan = document.createElement('span');
-          timeSpan.classList.add('text-gray-600', 'text-xs');
-          timeSpan.textContent = new Date(msg.timestamp).toLocaleString('zh-CN');
-          headerDiv.appendChild(timeSpan);
-          
-          messageDiv.appendChild(headerDiv);
-          
-          if (msg.role === 'assistant' && msg.reasoning_content) {
-            const reasoningDiv = document.createElement('div');
-            reasoningDiv.classList.add('my-2', 'p-2', 'bg-reasoningBg', 'text-white');
-            
-            const reasoningLabel = document.createElement('div');
-            reasoningLabel.classList.add('font-bold', 'mb-1');
-            reasoningLabel.textContent = '思考过程：';
-            reasoningDiv.appendChild(reasoningLabel);
-            
-            const reasoningContent = document.createElement('div');
-            reasoningContent.classList.add('whitespace-pre-wrap');
-            reasoningContent.textContent = msg.reasoning_content;
-            reasoningDiv.appendChild(reasoningContent);
-            messageDiv.appendChild(reasoningDiv);
-          }
-          
-          const contentDiv = document.createElement('div');
-          contentDiv.classList.add('whitespace-pre-wrap');
-          if (msg.role === 'assistant') {
-            const tempElement = document.createElement('div');
-            tempElement.innerHTML = this.renderMarkdown(msg.content);
-            contentDiv.textContent = this.extractTextFromMarkdown(tempElement);
-          } else {
-            contentDiv.textContent = msg.content;
-          }
-          
-          messageDiv.appendChild(contentDiv);
-          tempDiv.appendChild(messageDiv);
+        await exportChatToPDF(this.currentChat, this.renderMarkdown);
+        this.$message({
+          message: 'PDF导出成功',
+          type: 'success',
+          duration: 2000
         });
-        
-        const opt = {
-          margin: [15, 15],
-          filename: `${this.currentChat.title || '聊天记录'}.pdf`,
-          pagebreak: { mode: 'avoid-all' },
-          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-  
-        document.body.appendChild(tempDiv);
-        
-        try {
-          await html2pdf().set(opt).from(tempDiv).save();
-          this.$message({
-            message: 'PDF导出成功',
-            type: 'success',
-            duration: 2000
-          });
-        } finally {
-          document.body.removeChild(tempDiv);
-        }
       } catch (error) {
-        console.error('PDF导出失败:', error);
+        console.error('PDF 导出失败:', error);
         this.$message({
           message: 'PDF导出失败',
           type: 'error',
           duration: 2000
         });
       }
-    },
-    extractTextFromMarkdown(element) {
-      let text = '';
-      const nodes = element.childNodes;
-      for (const node of nodes) {
-        if (node.nodeType === Node.TEXT_NODE) {
-          text += node.textContent;
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          switch (node.tagName.toLowerCase()) {
-            case 'p':
-              text += this.extractTextFromMarkdown(node);
-              break;
-            case 'br':
-              text += ' ';
-              break;
-            case 'h1':
-            case 'h2':
-            case 'h3':
-            case 'h4':
-            case 'h5':
-            case 'h6':
-              text += this.extractTextFromMarkdown(node).toUpperCase();
-              break;
-            case 'ul':
-            case 'ol':
-              text += this.extractTextFromMarkdown(node);
-              break;
-            case 'li':
-              text += '• ' + this.extractTextFromMarkdown(node);
-              break;
-            case 'code':
-            case 'pre':
-              text += this.extractTextFromMarkdown(node);
-              break;
-            default:
-              text += this.extractTextFromMarkdown(node);
-          }
-        }
-      }
-      return text.trim();
     },
     confirmDelete() {
       console.log('confirmDelete called for chat id =', this.currentChatId)
