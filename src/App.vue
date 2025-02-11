@@ -85,7 +85,7 @@
         </div>
       </div>
 
-      <el-main :class="['message-list', 'flex-1', 'overflow-y-auto', 'p-5', showSidebar ? 'mt-16' : 'mt-0', 'md:mt-0', 'scrollbar', 'scrollbar-thumb-gray-500', 'scrollbar-track-gray-200']">
+      <el-main ref="messageContainer" :class="['message-list', 'flex-1', 'overflow-y-auto', 'p-5', showSidebar ? 'mt-16' : 'mt-0', 'md:mt-0', 'scrollbar', 'scrollbar-thumb-gray-500', 'scrollbar-track-gray-200']">
         <template v-if="!apiKey">
           <div class="empty-state text-center p-5">
             <el-alert type="info" :closable="false" show-icon>
@@ -97,7 +97,7 @@
                   请前往 <a href="https://cloud.siliconflow.cn/i/M9KJQRfy" target="_blank" class="text-secondary underline">硅基流动(本项目邀请码)</a><br> 或 <a href="https://cloud.siliconflow.cn/i/FuAPK085" target="_blank" class="text-secondary underline">(父项目邀请码)<br></a> 注册账号，获取您的 API Key<br>通过任一邀请码注册的新注册用户有14元免费额度。
                   <br>
                   点击右上角
-                  <el-button type="text" class="inline-block text-blue-500 p-0" @click="showSettings = true">
+                  <el-button type="link" class="inline-block text-blue-500 p-0" @click="showSettings = true">
                     <el-icon><Setting /></el-icon> 设置
                   </el-button>
                   按钮配置您的API Key
@@ -255,6 +255,18 @@
         ></el-alert>
       </div>
     </div>
+
+    <!-- 新增：滚动到底部悬浮按钮 -->
+    <button
+      v-if="showScrollToBottom"
+      @click="scrollToBottomManual"
+      class="fixed bottom-40 right-10 w-12 h-12 bg-gray-200 rounded-full shadow-neumorphic flex items-center justify-center focus:outline-none z-50"
+      title="滚动到底部"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
   </div>
 
   <!-- 设置抽屉 -->
@@ -385,7 +397,7 @@
       </div>
       <br>
       <div class="footer p-4 bg-white border-t text-center text-gray-600 text-sm">
-        <el-button type="text" @click="showAuthorInfo = true" class="ml-2">
+        <el-button type="link" @click="showAuthorInfo = true" class="ml-2">
           <el-icon><InfoFilled /></el-icon>
         </el-button>
         作者: <a href="https://tobenot.top/" target="_blank" class="text-secondary hover:underline">tobenot</a> &amp; © 2025 父项目作者: <a href="https://www.huasheng.ai" target="_blank" class="text-secondary hover:underline">花生</a>
@@ -512,6 +524,7 @@ export default {
         'https://api.siliconflow.cn/v1/chat/completions', // 对应硅基流动Key
         'https://api.deepseek.com/v1/chat/completions'               // 对应Deepseek官方Key
       ],
+      showScrollToBottom: false, // 新增：标记是否需要显示滚动到底部按钮
     }
   },
   computed: {
@@ -550,6 +563,25 @@ export default {
       this.createNewChat()
     }
   },
+  mounted() {
+    let container = this.$refs.messageContainer;
+    if (container && container.$el) {
+      container = container.$el;
+    }
+    if (container) {
+      container.addEventListener('scroll', this.handleContainerScroll);
+    }
+  },
+  unmounted() {
+    // 组件卸载时，移除scroll事件监听
+    let container = this.$refs.messageContainer;
+    if (container && container.$el) {
+      container = container.$el;
+    }
+    if (container) {
+      container.removeEventListener('scroll', this.handleContainerScroll);
+    }
+  },
   watch: {
     showSidebar(newVal) {
       // 当侧边栏打开时禁止整个网页滚动，关闭时恢复
@@ -585,8 +617,12 @@ export default {
       this.showSidebar = false
     },
     switchChat(chatId) {
-      this.currentChatId = chatId
-      this.showSidebar = false
+      this.currentChatId = chatId;
+      this.showSidebar = false;
+      // 切换对话后检测消息容器的滚动位置，更新滚动到底部按钮的显示状态
+      this.$nextTick(() => {
+        this.handleContainerScroll();
+      });
     },
     deleteChat(chatId) {
       const index = this.chatHistory.findIndex(chat => chat.id === chatId)
@@ -1139,7 +1175,26 @@ export default {
     },
     saveTemperature() {
       localStorage.setItem('temperature', this.temperature.toString());
-    }
+    },
+    handleContainerScroll() {
+      let container = this.$refs.messageContainer;
+      if (container && container.$el) {
+        container = container.$el;
+      }
+      if (container) {
+        const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+        this.showScrollToBottom = distanceFromBottom > 150; // 如距离底部超过150px，则显示按钮
+      }
+    },
+    scrollToBottomManual() {
+      let container = this.$refs.messageContainer;
+      if (container && container.$el) {
+        container = container.$el;
+      }
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    },
   }
 }
 </script>

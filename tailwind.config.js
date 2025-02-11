@@ -41,6 +41,10 @@ module.exports = {
         '90': '0.9',
         '95': '0.95',
       },
+      // 新增：拟物风格阴影效果
+      boxShadow: {
+        neumorphic: '8px 8px 16px rgba(0,0,0,0.15), -8px -8px 16px rgba(255,255,255,0.7)',
+      },
     },
   },
   variants: {
