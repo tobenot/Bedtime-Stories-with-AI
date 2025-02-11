@@ -238,11 +238,16 @@
           <el-col :span="4">
             <el-button
               class="btn-primary w-full h-full"
-              :loading="isLoading"
               :disabled="!apiKey"
-              @click="sendMessage()"
+              @click="handleButtonClick"
             >
-              发送
+              <template v-if="isLoading">
+                <i class="el-icon-loading" style="margin-right: 8px;"></i>
+                取消
+              </template>
+              <template v-else>
+                发送
+              </template>
             </el-button>
           </el-col>
         </el-row>
@@ -522,10 +527,13 @@ export default {
       importMode: null,
       apiUrl: localStorage.getItem('api_url') || 'https://api.siliconflow.cn/v1/chat/completions',
       apiUrlOptions: [
-        'https://api.siliconflow.cn/v1/chat/completions', // 对应硅基流动Key
-        'https://api.deepseek.com/v1/chat/completions'               // 对应Deepseek官方Key
+        'https://api.siliconflow.cn/v1/chat/completions',
+        'https://api.deepseek.com/v1/chat/completions'
       ],
-      showScrollToBottom: false, // 新增：标记是否需要显示滚动到底部按钮
+      showScrollToBottom: false,
+      // 新增：取消请求的控制器及标志
+      abortController: null,  // 用于取消fetch请求
+      cancelled: false,       // 标识是否用户主动取消
     }
   },
   computed: {
@@ -702,6 +710,8 @@ export default {
         this.isLoading = true;
         this.isTyping = true;
         this.errorMessage = '';
+        // 新增：初始化取消控制器
+        this.abortController = new AbortController();
 
         const assistantMessage = {
           role: 'assistant',
@@ -729,6 +739,7 @@ export default {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.apiKey}`
           },
+          signal: this.abortController.signal,  // 新增：传入取消信号
           body: JSON.stringify(requestBody)
         });
 
@@ -776,12 +787,23 @@ export default {
         }
         this.saveChatHistory();
       } catch (error) {
-        this.errorMessage = `请求失败: ${error.message}`;
-        // 出错时删除新增的助手消息
-        this.currentChat.messages.pop();
+        if (error.name === 'AbortError') {
+          // 处理取消请求时的情况，不删除最后一条助手消息
+          this.$message({
+            message: '生成已取消',
+            type: 'info',
+            duration: 2000
+          });
+        } else {
+          this.errorMessage = `请求失败: ${error.message}`;
+          // 出错时删除新增的助手消息
+          this.currentChat.messages.pop();
+        }
       } finally {
         this.isLoading = false;
         this.isTyping = false;
+        this.abortController = null;
+        this.cancelled = false;
         this.scrollToBottom();
       }
     },
@@ -1081,6 +1103,21 @@ export default {
       }
       if (container) {
         container.scrollTop = container.scrollHeight;
+      }
+    },
+    // 判断当前状态，决定发送消息或取消生成
+    handleButtonClick() {
+      if (this.isLoading && this.abortController) {
+        this.cancelRequest();
+      } else {
+        this.sendMessage();
+      }
+    },
+    // 取消当前正在进行的请求
+    cancelRequest() {
+      this.cancelled = true;
+      if (this.abortController) {
+        this.abortController.abort();
       }
     },
   }
