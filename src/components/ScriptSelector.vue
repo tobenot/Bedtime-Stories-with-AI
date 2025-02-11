@@ -14,12 +14,16 @@
           <el-icon><Grid /></el-icon>
           全部
         </el-radio-button>
+        <el-radio-button label="收藏">
+          <el-icon><Star /></el-icon>
+          收藏
+        </el-radio-button>
         <el-radio-button label="最新">
           <el-icon><Timer /></el-icon>
           最新
         </el-radio-button>
         <el-radio-button label="热门">
-          <el-icon><Star /></el-icon>
+          <el-icon><ChatDotRound /></el-icon>
           热门
         </el-radio-button>
         <el-radio-button label="基础">
@@ -86,6 +90,17 @@
               </el-icon>
             </div>
           </div>
+          <!-- 新增收藏图标，点击时阻止事件冒泡 -->
+          <div class="favorite-icon" @click.stop="toggleFavorite(script)">
+            <el-icon class="text-yellow-500 text-xl">
+              <template v-if="isFavorite(script)">
+                <StarFilled />
+              </template>
+              <template v-else>
+                <Star />
+              </template>
+            </el-icon>
+          </div>
         </el-card>
       </template>
       
@@ -118,11 +133,13 @@ import {
   ArrowRight,
   Grid,
   Timer,
-  Star,
+  ChatDotRound,
   Collection,
   UserFilled,
   Male,
-  Female
+  Female,
+  Star,
+  StarFilled
 } from '@element-plus/icons-vue'
 
 export default {
@@ -132,11 +149,13 @@ export default {
     ArrowRight,
     Grid,
     Timer,
-    Star,
+    ChatDotRound,
     Collection,
     UserFilled,
     Male,
-    Female
+    Female,
+    Star,
+    StarFilled
   },
   props: {
     modelValue: {
@@ -159,7 +178,8 @@ export default {
       dialogWidth: this.isMobile ? '100%' : '80%',
       selectedCategory: '全部',
       loading: false,
-      categories: ['全部', '最新', '热门', '基础', '跑团', '男性向', '女性向']
+      categories: ['全部', '最新', '热门', '基础', '跑团', '男性向', '女性向'],
+      favorites: []
     }
   },
   computed: {
@@ -178,7 +198,11 @@ export default {
             script.tags.some(tag => tag.toLowerCase().includes(query)));
         // 分类过滤：除了 "全部"，均按 tags 判断
         let matchesCategory = true;
-        if (this.selectedCategory !== '全部') {
+        if (this.selectedCategory === '全部') {
+          matchesCategory = true;
+        } else if (this.selectedCategory === '收藏') {
+          matchesCategory = this.favorites.includes(script.id);
+        } else {
           matchesCategory =
             script.tags && script.tags.includes(this.selectedCategory);
         }
@@ -197,6 +221,10 @@ export default {
     }
   },
   mounted() {
+    const storedFavorites = localStorage.getItem('scriptSelectorFavorites');
+    if (storedFavorites) {
+      this.favorites = JSON.parse(storedFavorites);
+    }
     window.addEventListener('resize', this.handleResize)
   },
   beforeUnmount() {
@@ -233,6 +261,21 @@ export default {
       console.log('[ScriptSelector] close dialog triggered');
       this.internalVisible = false;
       this.searchQuery = '';
+    },
+    toggleFavorite(script) {
+      const index = this.favorites.indexOf(script.id);
+      if (index > -1) {
+        this.favorites.splice(index, 1);
+      } else {
+        this.favorites.push(script.id);
+      }
+      this.persistFavorites();
+    },
+    persistFavorites() {
+      localStorage.setItem('scriptSelectorFavorites', JSON.stringify(this.favorites));
+    },
+    isFavorite(script) {
+      return this.favorites.includes(script.id);
     }
   }
 };
@@ -284,6 +327,7 @@ export default {
 .script-card {
   cursor: pointer;
   border: 1px solid #ebeef5;
+  position: relative;
 }
 
 .script-card:hover {
@@ -326,6 +370,14 @@ export default {
 .dialog-footer {
   border-top: 1px solid #ebeef5;
   padding-top: 16px;
+}
+
+.favorite-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  cursor: pointer;
+  z-index: 10;
 }
 
 @media (max-width: 768px) {
