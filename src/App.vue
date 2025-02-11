@@ -85,6 +85,7 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="copyChat">复制对话</el-dropdown-item>
+                <el-dropdown-item command="localScriptEditor">本地剧本编辑器</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -482,8 +483,11 @@
     </el-tabs>
   </el-dialog>
 
-  <!-- 引入剧本选择组件 -->
+  <!-- 使用剧本选择器 -->
   <ScriptSelector v-model="showScriptPanel" :scripts="scripts" @script-selected="selectScript" />
+
+  <!-- 新增：本地剧本编辑器 -->
+  <LocalScriptEditor v-model="showLocalScriptEditor" @script-selected="selectScript" />
 
   <!-- 新增：隐藏的文件上传控件，用于导入存档 -->
   <input
@@ -501,6 +505,7 @@ import { Refresh, CopyDocument, Delete, Edit, Briefcase, Setting, Expand } from 
 import html2pdf from 'html2pdf.js';
 import ChatItem from './components/ChatItem.vue';
 import ScriptSelector from './components/ScriptSelector.vue';
+import LocalScriptEditor from './components/LocalScriptEditor.vue';
 import scripts from './config/scripts.js';
 import { exportChatToPDF } from './utils/pdfExporter';
 import { MAX_TITLE_LENGTH, COPY_SUFFIX } from '@/config/constants.js';
@@ -509,6 +514,7 @@ export default {
   components: {
     ChatItem,
     ScriptSelector,
+    LocalScriptEditor,
   },
   data() {
     return {
@@ -533,6 +539,7 @@ export default {
       currentChatId: null,
       showAuthorInfo: false,
       showScriptPanel: false,
+      showLocalScriptEditor: false,
       scripts: scripts,
       defaultHideReasoning: JSON.parse(localStorage.getItem('default_hide_reasoning') || 'false'),
       autoCollapseReasoning: JSON.parse(localStorage.getItem('auto_collapse_reasoning') || 'false'),
@@ -1109,6 +1116,8 @@ export default {
     handleToolboxCommand(command) {
       if (command === 'copyChat') {
         this.copyCurrentChat();
+      } else if (command === 'localScriptEditor') {
+        this.showLocalScriptEditor = true;
       }
     },
     generateCopyTitle(originalTitle) {
