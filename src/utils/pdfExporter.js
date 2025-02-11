@@ -67,7 +67,11 @@ export async function exportChatToPDF(chat, renderMarkdownFn) {
   // 遍历所有消息，构建消息内容区域
   chat.messages.forEach(msg => {
     const messageDiv = document.createElement('div');
-    messageDiv.classList.add('my-4', 'p-4', 'border', 'border-gray-200', 'page-break-avoid');
+    messageDiv.classList.add('my-4', 'p-4', 'border', 'border-gray-200');
+    // 仅对非助手消息添加防止分页的类，避免长助手消息被整体挤到下一页导致空白
+    if (msg.role !== 'assistant') {
+      messageDiv.classList.add('page-break-avoid');
+    }
 
     const headerDiv = document.createElement('div');
     headerDiv.classList.add('mb-2', 'flex', 'justify-between');
@@ -123,7 +127,7 @@ export async function exportChatToPDF(chat, renderMarkdownFn) {
   const opt = {
     margin: [15, 15],
     filename: `${chat.title || '聊天记录'}.pdf`,
-    pagebreak: { mode: 'avoid-all' },
+    pagebreak: { mode: 'css' },
     html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
   };
