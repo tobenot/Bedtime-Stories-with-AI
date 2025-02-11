@@ -503,6 +503,7 @@ import ChatItem from './components/ChatItem.vue';
 import ScriptSelector from './components/ScriptSelector.vue';
 import scripts from './config/scripts.js';
 import { exportChatToPDF } from './utils/pdfExporter';
+import { MAX_TITLE_LENGTH, COPY_SUFFIX } from '@/config/constants.js';
 
 export default {
   components: {
@@ -543,9 +544,8 @@ export default {
         'https://api.deepseek.com/v1/chat/completions'
       ],
       showScrollToBottom: false,
-      // 新增：取消请求的控制器及标志
-      abortController: null,  // 用于取消fetch请求
-      cancelled: false,       // 标识是否用户主动取消
+      abortController: null,
+      cancelled: false,
     }
   },
   computed: {
@@ -594,7 +594,6 @@ export default {
     }
   },
   unmounted() {
-    // 组件卸载时，移除scroll事件监听
     let container = this.$refs.messageContainer;
     if (container && container.$el) {
       container = container.$el;
@@ -605,7 +604,6 @@ export default {
   },
   watch: {
     showSidebar(newVal) {
-      // 当侧边栏打开时禁止整个网页滚动，关闭时恢复
       document.body.style.overflow = newVal ? 'hidden' : '';
     }
   },
@@ -640,7 +638,6 @@ export default {
     switchChat(chatId) {
       this.currentChatId = chatId;
       this.showSidebar = false;
-      // 切换对话后检测消息容器的滚动位置，更新滚动到底部按钮的显示状态
       this.$nextTick(() => {
         this.handleContainerScroll();
       });
@@ -678,8 +675,7 @@ export default {
       this.$nextTick(() => {
         const container = document.querySelector('.message-list');
         if (container) {
-          const threshold = 50; // 阈值：如果用户距离底部超过50像素，则不自动滚动
-          // 只有当用户接近底部时才自动滚动到底部
+          const threshold = 50;
           if (container.scrollTop + container.clientHeight + threshold >= container.scrollHeight) {
             container.scrollTop = container.scrollHeight;
           }
@@ -688,7 +684,6 @@ export default {
     },
     async sendMessage(isRegenerate = false) {
       if (isRegenerate) {
-        // 确保最后一条消息为用户消息。如果不是，则移除所有助手消息
         while (
           this.currentChat.messages.length > 0 &&
           this.currentChat.messages[this.currentChat.messages.length - 1].role !== 'user'
@@ -709,7 +704,6 @@ export default {
         this.currentChat.messages.push(userMessage);
       }
 
-      // 新增：如果启用了自动折叠，则折叠所有助手消息的思考过程
       if (this.autoCollapseReasoning && !isRegenerate) {
         this.currentChat.messages.forEach(msg => {
           if (msg.role === 'assistant' && !msg.isReasoningCollapsed) {
@@ -722,7 +716,6 @@ export default {
         this.isLoading = true;
         this.isTyping = true;
         this.errorMessage = '';
-        // 新增：初始化取消控制器
         this.abortController = new AbortController();
 
         const assistantMessage = {
@@ -751,7 +744,7 @@ export default {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${this.apiKey}`
           },
-          signal: this.abortController.signal,  // 新增：传入取消信号
+          signal: this.abortController.signal,
           body: JSON.stringify(requestBody)
         });
 
@@ -789,7 +782,6 @@ export default {
               if (data.choices[0]?.delta?.content !== null && data.choices[0]?.delta?.content !== undefined) {
                 currentMessage.content += data.choices[0].delta.content || '';
               }
-              // 触发视图更新
               this.currentChat.messages = [...this.currentChat.messages];
               this.scrollToBottom();
             } catch (error) {
@@ -800,7 +792,6 @@ export default {
         this.saveChatHistory();
       } catch (error) {
         if (error.name === 'AbortError') {
-          // 处理取消请求时的情况，不删除最后一条助手消息
           this.$message({
             message: '生成已取消',
             type: 'info',
@@ -808,7 +799,6 @@ export default {
           });
         } else {
           this.errorMessage = `请求失败: ${error.message}`;
-          // 出错时删除新增的助手消息
           this.currentChat.messages.pop();
         }
       } finally {
@@ -838,19 +828,15 @@ export default {
             duration: 2000
           });
         } catch (err) {
-          // 出现错误时尝试回退复制方案
           this.fallbackCopy(content);
         }
       } else {
-        // 如果浏览器不支持 Clipboard API，使用回退复制方案
         this.fallbackCopy(content);
       }
     },
-    // 新增 fallbackCopy 方法，采用 document.execCommand 方式复制
     fallbackCopy(content) {
       const textarea = document.createElement('textarea');
       textarea.value = content;
-      // 隐藏 textarea 并避免页面滚动
       textarea.style.position = 'fixed';
       textarea.style.top = '-9999px';
       textarea.style.left = '-9999px';
@@ -911,7 +897,6 @@ export default {
         })
         .catch(() => {
           console.log('User canceled delete')
-          // 用户取消删除，不做处理
         })
     },
     mobileSwitch(id) {
@@ -951,7 +936,6 @@ export default {
           duration: 2000
         });
       }).catch(() => {
-        // 用户取消删除，不做任何操作
       });
     },
     deleteMessage(index) {
@@ -984,12 +968,10 @@ export default {
       const messages = this.currentChat && this.currentChat.messages ? this.currentChat.messages : [];
       if (messages.length === 0) return;
       const lastMessage = messages[messages.length - 1];
-      // 如果最后一条消息是用户消息，则直接重新生成，不需要二次确认
       if (lastMessage.role === 'user') {
         this.sendMessage(true);
         return;
       }
-      // 如果为助手消息，则弹出确认对话框
       this.$confirm(
         '确定重新生成这条消息吗？目前这里与官方APP不一样，此操作将永久删除当前消息。',
         '确认重新生成',
@@ -1003,7 +985,6 @@ export default {
           this.sendMessage(true);
         })
         .catch(() => {
-          // 用户取消重新生成操作，不做任何处理
         });
     },
     exportChatArchive() {
@@ -1030,7 +1011,6 @@ export default {
       }
     },
     importChatArchive(mode) {
-      // mode 为 "merge" 或 "overwrite"
       this.importMode = mode;
       this.$refs.importFile.click();
     },
@@ -1042,7 +1022,6 @@ export default {
         let importedData = null;
         try {
           importedData = JSON.parse(e.target.result);
-          // 检查导入的数据是否为数组格式
           if (!Array.isArray(importedData)) {
             throw new Error('导入文件格式错误，应该为聊天历史数组');
           }
@@ -1055,7 +1034,6 @@ export default {
           return;
         }
         if (this.importMode === 'overwrite') {
-          // 覆盖：用导入的数据替换现有存档
           this.chatHistory = importedData;
           if (this.chatHistory.length > 0) {
             this.currentChatId = this.chatHistory[0].id;
@@ -1068,7 +1046,6 @@ export default {
             duration: 2000
           });
         } else if (this.importMode === 'merge') {
-          // 合并：将导入的存档与现有存档合并
           this.chatHistory = importedData.concat(this.chatHistory);
           if (!this.currentChatId && this.chatHistory.length > 0) {
             this.currentChatId = this.chatHistory[0].id;
@@ -1082,7 +1059,6 @@ export default {
         this.saveChatHistory();
       };
       reader.readAsText(file);
-      // 清空文件输入，以便下次可选相同文件
       event.target.value = '';
     },
     changeChatTitle({ id, title }) {
@@ -1105,7 +1081,7 @@ export default {
       }
       if (container) {
         const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
-        this.showScrollToBottom = distanceFromBottom > 150; // 如距离底部超过150px，则显示按钮
+        this.showScrollToBottom = distanceFromBottom > 150;
       }
     },
     scrollToBottomManual() {
@@ -1117,7 +1093,6 @@ export default {
         container.scrollTop = container.scrollHeight;
       }
     },
-    // 判断当前状态，决定发送消息或取消生成
     handleButtonClick() {
       if (this.isLoading && this.abortController) {
         this.cancelRequest();
@@ -1125,41 +1100,33 @@ export default {
         this.sendMessage();
       }
     },
-    // 取消当前正在进行的请求
     cancelRequest() {
       this.cancelled = true;
       if (this.abortController) {
         this.abortController.abort();
       }
     },
-    // 新增：处理工具箱下拉菜单命令
     handleToolboxCommand(command) {
       if (command === 'copyChat') {
         this.copyCurrentChat();
       }
     },
-    // 新增：生成复制对话标题的方法
     generateCopyTitle(originalTitle) {
-      const COPY_SUFFIX = ' (复制)';
-      const MAX_TITLE_LENGTH = 50; // 限制复制后标题的最大长度
       let baseTitle = originalTitle;
-      // 去除末尾所有重复的复制后缀
       while (baseTitle.endsWith(COPY_SUFFIX)) {
         baseTitle = baseTitle.slice(0, -COPY_SUFFIX.length);
       }
-      // 如果标题太长，则截断标题以保证加上后缀后不超过最大长度
       if (baseTitle.length > MAX_TITLE_LENGTH - COPY_SUFFIX.length) {
         baseTitle = baseTitle.slice(0, MAX_TITLE_LENGTH - COPY_SUFFIX.length);
       }
       return baseTitle + COPY_SUFFIX;
     },
-    // 修改：复制当前对话时使用生成的标题
     copyCurrentChat() {
       if (!this.currentChat) return;
       const newChat = {
-        id: Date.now(),  // 新 id
-        title: this.generateCopyTitle(this.currentChat.title), // 使用截断后的标题
-        messages: JSON.parse(JSON.stringify(this.currentChat.messages)), // 深拷贝消息数据
+        id: Date.now(),
+        title: this.generateCopyTitle(this.currentChat.title),
+        messages: JSON.parse(JSON.stringify(this.currentChat.messages)),
         createdAt: new Date().toISOString()
       };
       this.chatHistory.unshift(newChat);
@@ -1178,7 +1145,6 @@ export default {
 <style src="./index.css"></style>
 
 <style>
-/* 添加自定义样式以隐藏折叠状态下的思考过程 */
 .reasoning-body.collapsed {
   display: none;
 }
@@ -1190,7 +1156,6 @@ export default {
   margin-bottom: 0;
 }
 
-/* 自定义温度滑动条样式 */
 .custom-slider .el-slider__runway {
   height: 8px;
   border-radius: 4px;

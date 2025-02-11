@@ -41,6 +41,7 @@
 <script>
 import { ElMessageBox } from 'element-plus'
 import { ChatRound, Delete, Edit } from '@element-plus/icons-vue'
+import { MAX_TITLE_LENGTH } from '@/config/constants.js'
 
 export default {
   name: 'ChatItem',
@@ -90,15 +91,23 @@ export default {
       this.isEditing = true;
     },
     saveTitle() {
-      if (this.editTitle.trim() === '') {
+      const trimmedTitle = this.editTitle.trim();
+      if (trimmedTitle === '') {
         this.$message({
           message: '标题不能为空',
           type: 'warning',
           duration: 2000
         });
         this.editTitle = this.chat.title;
-      } else if (this.editTitle !== this.chat.title) {
-        this.$emit('update-title', { id: this.chat.id, title: this.editTitle });
+      } else {
+        let newTitle = trimmedTitle;
+        // 限制标题长度为 MAX_TITLE_LENGTH
+        if (newTitle.length > MAX_TITLE_LENGTH) {
+          newTitle = newTitle.slice(0, MAX_TITLE_LENGTH);
+        }
+        if (newTitle !== this.chat.title) {
+          this.$emit('update-title', { id: this.chat.id, title: newTitle });
+        }
       }
       this.isEditing = false;
     }
