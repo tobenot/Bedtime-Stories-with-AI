@@ -124,7 +124,12 @@
             <div class="empty-state-icon mb-4">
               <img src="./logo.svg" alt="Logo" class="w-12 h-12 inline-block" />
             </div>
-            <h3 class="empty-state-title text-2xl font-semibold text-primary mb-2">开始新的对话</h3>
+            <div class="software-info mb-4">
+              <h1 class="software-title text-3xl font-bold text-primary">与AI的睡前故事</h1>
+              <p class="software-author text-lg text-gray-700">作者：tobenot</p>
+              <p class="software-message text-sm text-gray-600">因为喜欢和AI玩文字游戏和聊各种东西，所以做了这个项目，希望你也喜欢！</p>
+            </div>
+            <h3 class="empty-state-title text-2xl font-semibold text-primary mb-2">开始新的对话吧！</h3>
             <p class="empty-state-description text-base text-customGray mb-4">
               如果你要把这里当做普通的对话，请直接像在官方app那样使用~<br>
               如果你要玩剧本，请选择剧本，或者自己在下方输入框输入你想要的故事开头！
@@ -561,7 +566,7 @@ export default {
     },
     apiUrlHint() {
       if (this.apiUrl === 'https://api.siliconflow.cn/v1/chat/completions') {
-        return '当前选择的是硅基流动接口 请使用硅基流动的Key: https://cloud.siliconflow.cn/account/ak';
+        return '当前选择的是硅基流动接口 请使用硅基流动的Key';
       } else if (this.apiUrl === 'https://api.deepseek.com/v1/chat/completions') {
         return '注意，Deepseek 官方接口 还并未支持，请勿使用。官方接口写起来有点麻烦）';
       } else {
