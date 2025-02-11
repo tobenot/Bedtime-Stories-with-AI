@@ -94,14 +94,15 @@ module.exports = {
       }
       addComponents(iconButton)
     }),
-    // 新增：统一的头部操作按钮样式，由于需要压扁变宽，所以改为左右padding更大
+    // 修改头部操作按钮样式，针对手机做尺寸优化
     plugin(function({ addComponents, theme }) {
       const headerActionButton = {
         '.header-action-button': {
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '0.5rem 1rem', // 垂直padding 0.5rem，水平padding 1rem，使按钮更加扁平
+          // 默认为手机样式：尺寸较小
+          padding: '0.25rem 0.5rem',
           borderRadius: theme('borderRadius.md'),
           border: '1px solid white',
           backgroundColor: 'transparent',
@@ -111,7 +112,14 @@ module.exports = {
             backgroundColor: 'rgba(255, 255, 255, 0.1)',
           },
           '& .el-icon': {
-            fontSize: '1.25rem',
+            fontSize: '1rem',
+          },
+          // md及以上屏幕下恢复原有较大样式
+          '@media (min-width: 768px)': {
+            padding: '0.5rem 1rem',
+            '& .el-icon': {
+              fontSize: '1.25rem',
+            },
           },
         }
       }

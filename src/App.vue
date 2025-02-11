@@ -84,7 +84,7 @@
             </template>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="copyChat">复制对话</el-dropdown-item>
+                <el-dropdown-item command="copyChat">复制对话(开if线)</el-dropdown-item>
                 <el-dropdown-item command="localScriptEditor">本地剧本编辑器</el-dropdown-item>
               </el-dropdown-menu>
             </template>

@@ -37,6 +37,7 @@
       <div v-if="!localScripts.length" class="empty-state text-center py-8">
         <el-icon class="text-4xl text-gray-400 mb-4"><Document /></el-icon>
         <p class="text-gray-500">还没有本地剧本，快来创建一个吧！</p>
+        <p class="text-gray-500">它们只保存在浏览器中，不会公开！</p>
       </div>
       <el-card
         v-for="script in localScripts"
