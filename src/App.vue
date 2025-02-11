@@ -75,13 +75,25 @@
         <div class="flex items-center gap-2">
           <h2 class="text-lg text-white font-medium">{{ currentChat?.title || '与AI的睡前故事' }}</h2>
         </div>
-        <div class="header-actions flex items-center gap-2">
-          <el-button class="btn-secondary text-white border-white hover:bg-white/10" @click="exportToPDF" :disabled="!currentChat?.messages?.length">
-            <el-icon><Download /></el-icon>
-          </el-button>
-          <el-button class="btn-secondary text-white border-white hover:bg-white/10" @click="showSettings = true">
+        <div class="header-actions flex items-center gap-4">
+          <el-dropdown trigger="click" @command="handleToolboxCommand">
+            <template #default>
+              <button class="header-action-button">
+                <el-icon><Briefcase /></el-icon>
+              </button>
+            </template>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="copyChat">复制对话</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <button class="header-action-button" @click="exportToPDF" :disabled="!currentChat?.messages?.length">
+            <el-icon><Printer /></el-icon>
+          </button>
+          <button class="header-action-button" @click="showSettings = true">
             <el-icon><Setting /></el-icon>
-          </el-button>
+          </button>
         </div>
       </div>
 
@@ -485,7 +497,7 @@
 
 <script>
 import { marked } from 'marked';
-import { Refresh, CopyDocument, Delete, Edit } from '@element-plus/icons-vue';
+import { Refresh, CopyDocument, Delete, Edit, Briefcase, Setting, Expand } from '@element-plus/icons-vue';
 import html2pdf from 'html2pdf.js';
 import ChatItem from './components/ChatItem.vue';
 import ScriptSelector from './components/ScriptSelector.vue';
@@ -1119,6 +1131,45 @@ export default {
       if (this.abortController) {
         this.abortController.abort();
       }
+    },
+    // 新增：处理工具箱下拉菜单命令
+    handleToolboxCommand(command) {
+      if (command === 'copyChat') {
+        this.copyCurrentChat();
+      }
+    },
+    // 新增：生成复制对话标题的方法
+    generateCopyTitle(originalTitle) {
+      const COPY_SUFFIX = ' (复制)';
+      const MAX_TITLE_LENGTH = 50; // 限制复制后标题的最大长度
+      let baseTitle = originalTitle;
+      // 去除末尾所有重复的复制后缀
+      while (baseTitle.endsWith(COPY_SUFFIX)) {
+        baseTitle = baseTitle.slice(0, -COPY_SUFFIX.length);
+      }
+      // 如果标题太长，则截断标题以保证加上后缀后不超过最大长度
+      if (baseTitle.length > MAX_TITLE_LENGTH - COPY_SUFFIX.length) {
+        baseTitle = baseTitle.slice(0, MAX_TITLE_LENGTH - COPY_SUFFIX.length);
+      }
+      return baseTitle + COPY_SUFFIX;
+    },
+    // 修改：复制当前对话时使用生成的标题
+    copyCurrentChat() {
+      if (!this.currentChat) return;
+      const newChat = {
+        id: Date.now(),  // 新 id
+        title: this.generateCopyTitle(this.currentChat.title), // 使用截断后的标题
+        messages: JSON.parse(JSON.stringify(this.currentChat.messages)), // 深拷贝消息数据
+        createdAt: new Date().toISOString()
+      };
+      this.chatHistory.unshift(newChat);
+      this.currentChatId = newChat.id;
+      this.saveChatHistory();
+      this.$message({
+        message: '对话已复制',
+        type: 'success',
+        duration: 2000
+      });
     },
   }
 }

@@ -76,14 +76,14 @@ module.exports = {
     // 注册图标按钮组件 (.btn-refresh, .btn-copy, .btn-delete, .btn-edit)
     plugin(function({ addComponents, theme }) {
       const iconButton = {
-        '.btn-refresh, .btn-copy, .btn-delete, .btn-edit': {  // 新增 .btn-edit
+        '.btn-refresh, .btn-copy, .btn-delete, .btn-edit': {
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
           padding: `${theme('spacing.2')} ${theme('spacing.3')}`, // 使用内边距控制尺寸
           fontSize: theme('fontSize.sm'),
           fontWeight: theme('fontWeight.medium'),
-          borderRadius: theme('borderRadius.md'), // 使用常规圆角
+          borderRadius: theme('borderRadius.md'),
           backgroundColor: theme('colors.gray.400'),
           color: theme('colors.white'),
           transition: 'background-color 0.2s ease',
@@ -93,6 +93,29 @@ module.exports = {
         },
       }
       addComponents(iconButton)
+    }),
+    // 新增：统一的头部操作按钮样式，由于需要压扁变宽，所以改为左右padding更大
+    plugin(function({ addComponents, theme }) {
+      const headerActionButton = {
+        '.header-action-button': {
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '0.5rem 1rem', // 垂直padding 0.5rem，水平padding 1rem，使按钮更加扁平
+          borderRadius: theme('borderRadius.md'),
+          border: '1px solid white',
+          backgroundColor: 'transparent',
+          color: theme('colors.white'),
+          transition: 'all 0.2s ease',
+          '&:hover': {
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          },
+          '& .el-icon': {
+            fontSize: '1.25rem',
+          },
+        }
+      }
+      addComponents(headerActionButton)
     }),
   ],
 } 
