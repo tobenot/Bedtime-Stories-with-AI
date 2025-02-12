@@ -130,6 +130,7 @@
 
 <script>
 import { Plus, Download, Upload, ArrowDown, Document, Edit, Delete, Switch } from '@element-plus/icons-vue'
+import confirmUseScript from '@/utils/scriptPreview';
 
 export default {
   name: 'LocalScriptEditor',
@@ -259,20 +260,14 @@ export default {
       }).catch(() => {});
     },
     previewScript(script) {
-      // 显示剧本详情预览，确认是否使用该剧本
-      let message = script.content;
-      if (script.tags && script.tags.length) {
-        message += `<br/><span>标签：${script.tags.join(', ')}</span>`;
-      }
-      this.$confirm(message, `剧本预览 - ${script.title}`, {
-        confirmButtonText: '使用该剧本',
-        cancelButtonText: '取消',
-        dangerouslyUseHTMLString: true,
-        customClass: 'confirm-script-preview'
-      }).then(() => {
-        this.$emit('script-selected', script);
-        this.internalVisible = false;
-      }).catch(() => {});
+      confirmUseScript(script, { confirmButtonText: '使用该剧本', title: `剧本预览 - ${script.title}` })
+        .then(() => {
+          this.$emit('script-selected', script);
+          this.internalVisible = false;
+        })
+        .catch(() => {
+          // 用户取消操作，可根据需要处理
+        });
     },
     exportScripts() {
       const dataStr = JSON.stringify(this.localScripts, null, 2);

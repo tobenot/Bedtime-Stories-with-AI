@@ -514,6 +514,7 @@ import LocalScriptEditor from './components/LocalScriptEditor.vue';
 import scripts from './config/scripts.js';
 import { exportChatToPDF } from './utils/pdfExporter';
 import { MAX_TITLE_LENGTH, COPY_SUFFIX } from '@/config/constants.js';
+import confirmUseScript from './utils/scriptPreview.js';
 
 export default {
   components: {
@@ -921,8 +922,17 @@ export default {
     },
     selectScript(script) {
       console.log('[App] script selected:', script);
-      this.inputMessage = script.content;
-      this.focusInput();
+      confirmUseScript(script)
+        .then(finalScript => {
+          this.inputMessage = finalScript;
+          this.showScriptPanel = false;
+          this.$nextTick(() => {
+            this.focusInput();
+          });
+        })
+        .catch(error => {
+          console.warn('剧本选择已取消或发生错误:', error);
+        });
     },
     joinGroup(groupName) {
       let url = ''
