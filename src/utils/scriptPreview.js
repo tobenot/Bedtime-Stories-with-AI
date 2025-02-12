@@ -1,5 +1,7 @@
 // 该工具模块用于显示剧本预览并确认是否使用剧本，同时内置通配符处理功能
 import { ElMessageBox } from 'element-plus';
+import { createApp } from 'vue';
+import PromptWildcards from '../components/PromptWildcards.vue';
 
 // 通配符正则（支持中英文括号和标点）
 const wildcardRegex = /\{\{\s*[\(（]提示[:：](.*?)[\)）]\s*[，,]\s*[\(（]选项[:：](.*?)[\)）]\s*[，,]\s*[\(（]写入[:：](.*?)[\)）]\s*\}\}/g;
@@ -65,42 +67,28 @@ function fillWildcards(text, selections = {}) {
 }
 
 /**
- * 依次提示用户填写所有的通配符项，返回填写结果
+ * 修改后的对话框提示函数：一次性显示所有通配符让玩家同时填写
  * @param {Array} wildcards - 通配符数组（由 extractWildcards 得到）
  * @returns {Promise<Object>} 返回映射对象：键为通配符索引，值为玩家填写的内容
  */
 function promptWildcards(wildcards) {
   return new Promise((resolve, reject) => {
-    let selections = {};
-    let index = 0;
-    const ask = () => {
-      if (index >= wildcards.length) {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const app = createApp(PromptWildcards, {
+      wildcards,
+      onConfirm: (selections) => {
         resolve(selections);
-        return;
+        app.unmount();
+        document.body.removeChild(container);
+      },
+      onCancel: () => {
+        reject(new Error('取消输入'));
+        app.unmount();
+        document.body.removeChild(container);
       }
-      const wc = wildcards[index];
-      // 构造提示信息，仅显示提示文本；可选项通过输入框 placeholder 呈现，避免暴露通配符格式
-      const message = wc.prompt;
-      ElMessageBox.prompt(message, '请输入', {
-        inputValue: wc.defaultValue,
-        placeholder: `可选项：${wc.options.join('、')}`,
-        inputPattern: /.+/,
-        inputErrorMessage: '输入不能为空'
-      })
-        .then(({ value }) => {
-          selections[index] = value;
-          index++;
-          ask();
-        })
-        .catch(error => {
-          reject(error);
-        });
-    };
-    if (wildcards.length > 0) {
-      ask();
-    } else {
-      resolve(selections);
-    }
+    });
+    app.mount(container);
   });
 }
 
