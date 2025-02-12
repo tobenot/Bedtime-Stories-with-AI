@@ -35,6 +35,13 @@
           >
             {{ option }}
           </el-tag>
+          <el-tag 
+            class="custom-option"
+            @click="selections[index] = ''"
+            :effect="selections[index] === '' ? 'dark' : 'plain'"
+          >
+            自定义
+          </el-tag>
         </div>
 
         <el-input

@@ -34,7 +34,7 @@ function extractWildcards(text) {
   while ((match = wildcardRegex.exec(text)) !== null) {
     const [fullMatch, prompt, optionsStr, template] = match;
     const options = optionsStr
-      .split(/[,，、]/)
+      .split('、')  // 只用顿号分隔
       .map(opt => opt.trim())
       .filter(opt => opt.length > 0);
     wildcards.push({
@@ -61,7 +61,7 @@ function fillWildcards(text, selections = {}) {
   wildcardRegex.lastIndex = 0; // 重置正则状态
   return text.replace(wildcardRegex, (match, prompt, optionsStr, template) => {
     const options = optionsStr
-      .split(/[,，、]/)
+      .split('、')  // 只用顿号分隔
       .map(opt => opt.trim())
       .filter(opt => opt.length > 0);
     const defaultValue = options.length > 0 ? options[0] : '';
