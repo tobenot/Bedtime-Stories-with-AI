@@ -101,8 +101,51 @@ function promptWildcards(wildcards) {
   });
 }
 
+// 修改 dialogConfig 对象
+const dialogConfig = {
+  width: '80%',
+  customStyle: {
+    maxWidth: '701px',
+    margin: '5vh auto 0',
+    '.el-message-box__content': {
+      maxHeight: '80vh',
+      overflow: 'auto',
+      padding: '20px 24px'
+    },
+    '.el-message-box__content::-webkit-scrollbar': {
+      width: '8px'
+    },
+    '.el-message-box__content::-webkit-scrollbar-track': {
+      backgroundColor: 'transparent'
+    },
+    '.el-message-box__content::-webkit-scrollbar-thumb': {
+      backgroundColor: 'var(--el-border-color)',
+      borderRadius: '4px'
+    },
+    '.el-message-box__content::-webkit-scrollbar-thumb:hover': {
+      backgroundColor: 'var(--el-border-color-darker)'
+    },
+    '.el-message-box__header': {
+      padding: '16px 24px',
+      borderBottom: '1px solid var(--el-border-color-light)',
+      position: 'sticky',
+      top: 0,
+      backgroundColor: 'white',
+      zIndex: 1
+    },
+    '.el-message-box__footer': {
+      padding: '16px 24px',
+      borderTop: '1px solid var(--el-border-color-light)',
+      position: 'sticky',
+      bottom: 0,
+      backgroundColor: 'white',
+      zIndex: 1
+    }
+  }
+};
+
 /**
- * 显示最终确认对话框
+ * 修改 showConfirm 函数
  * @param {string} preview - 最终预览文本
  * @param {Object} script - 剧本对象，用于构造标题
  * @param {Object} options - 额外选项
@@ -114,12 +157,95 @@ function showConfirm(preview, script, options = {}) {
     title: defaultTitle,
     confirmButtonText: '使用该剧本',
     cancelButtonText: '取消',
-    customClass: 'confirm-script-preview',
+    customClass: 'global-dialog script-preview-dialog',
     dangerouslyUseHTMLString: true,
+    showClose: true,
+    ...dialogConfig
   };
   const finalOptions = { ...defaultOptions, ...options };
   return ElMessageBox.confirm(preview, finalOptions.title, finalOptions);
 }
+
+/**
+ * 修改预览样式
+ * @returns {string} 预览样式
+ */
+const previewStyles = `
+  <style>
+    .script-preview-content {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--el-text-color-primary);
+    }
+    .preview-notice {
+      margin-bottom: 20px;
+      padding: 12px 16px;
+      background: var(--el-color-warning-light-9);
+      border-radius: 8px;
+      color: var(--el-color-warning);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .markdown-body {
+      padding: 0 4px;
+    }
+    .markdown-body h1,
+    .markdown-body h2,
+    .markdown-body h3 {
+      border-bottom: 1px solid var(--el-border-color-light);
+      padding-bottom: 0.3em;
+      margin-top: 1.5em;
+      margin-bottom: 1em;
+    }
+    .markdown-body pre {
+      background-color: var(--el-fill-color-light);
+      border-radius: 8px;
+      padding: 16px;
+      overflow: auto;
+    }
+    .markdown-body code {
+      background-color: var(--el-fill-color);
+      border-radius: 4px;
+      padding: 0.2em 0.4em;
+      font-size: 85%;
+    }
+    .markdown-body blockquote {
+      border-left: 4px solid var(--el-border-color);
+      color: var(--el-text-color-secondary);
+      margin: 0;
+      padding: 0 1em;
+    }
+    .wildcard-placeholder {
+      display: inline-block;
+      background-color: var(--el-color-primary-light-9);
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px dashed var(--el-color-primary);
+      color: var(--el-color-primary);
+      font-weight: 500;
+      cursor: help;
+    }
+    .preview-footer {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--el-border-color-lighter);
+      color: var(--el-text-color-secondary);
+      font-size: 14px;
+    }
+    .preview-footer a {
+      color: var(--el-color-primary);
+      text-decoration: none;
+    }
+    .preview-footer a:hover {
+      text-decoration: underline;
+    }
+    .preview-footer .tags-info {
+      margin-top: 8px;
+    }
+  </style>
+`;
 
 /**
  * 主函数：确认并使用剧本
@@ -172,83 +298,7 @@ function confirmUseScript(script, options = {}) {
   `;
 
   // 添加预览样式
-  previewHtml = `
-    <style>
-      .script-preview-content {
-        font-size: 16px;
-        line-height: 1.6;
-        color: #2c3e50;
-      }
-      .preview-notice {
-        margin-bottom: 20px;
-        padding: 12px 16px;
-        background: #fdf6ec;
-        border-radius: 6px;
-        color: #e6a23c;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .markdown-body {
-        padding: 0 4px;
-      }
-      .markdown-body h1,
-      .markdown-body h2,
-      .markdown-body h3 {
-        border-bottom: 1px solid #eaecef;
-        padding-bottom: 0.3em;
-        margin-top: 1.5em;
-        margin-bottom: 1em;
-      }
-      .markdown-body pre {
-        background-color: #f6f8fa;
-        border-radius: 6px;
-        padding: 16px;
-        overflow: auto;
-      }
-      .markdown-body code {
-        background-color: rgba(27,31,35,0.05);
-        border-radius: 3px;
-        padding: 0.2em 0.4em;
-        font-size: 85%;
-      }
-      .markdown-body blockquote {
-        border-left: 4px solid #dfe2e5;
-        color: #6a737d;
-        margin: 0;
-        padding: 0 1em;
-      }
-      .wildcard-placeholder {
-        display: inline-block;
-        background-color: #f0f9ff;
-        padding: 2px 8px;
-        border-radius: 4px;
-        border: 1px dashed #409eff;
-        color: #409eff;
-        font-weight: 500;
-        cursor: help;
-      }
-      .preview-footer {
-        margin-top: 30px;
-        padding-top: 20px;
-        border-top: 1px solid #eaecef;
-        color: #666;
-        font-size: 14px;
-      }
-      .preview-footer a {
-        color: #409eff;
-        text-decoration: none;
-      }
-      .preview-footer a:hover {
-        text-decoration: underline;
-      }
-      .preview-footer .tags-info {
-        margin-top: 8px;
-      }
-    </style>
-    ${previewHtml}
-  `;
+  previewHtml = previewStyles + previewHtml;
 
   // 显示预览对话框
   return showConfirm(previewHtml, script, {
@@ -257,12 +307,12 @@ function confirmUseScript(script, options = {}) {
     cancelButtonText: '取消',
     customClass: 'preview-dialog-initial',
     showClose: true,
-    width: '70%',
+    width: '80%',
     customStyle: {
-      maxWidth: '1000px',
-      margin: '15vh auto 0',
+      maxWidth: '701px',
+      margin: '5vh auto 0',
       '.el-message-box__content': {
-        maxHeight: '60vh',
+        maxHeight: '80vh',
         overflow: 'auto'
       }
     }
@@ -309,12 +359,12 @@ function confirmUseScript(script, options = {}) {
           cancelButtonText: '返回修改',
           customClass: 'preview-dialog-final',
           showClose: true,
-          width: '70%',
+          width: '80%',
           customStyle: {
-            maxWidth: '1000px',
-            margin: '15vh auto 0',
+            maxWidth: '701px',
+            margin: '5vh auto 0',
             '.el-message-box__content': {
-              maxHeight: '60vh',
+              maxHeight: '80vh',
               overflow: 'auto'
             }
           }

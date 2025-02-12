@@ -2,15 +2,16 @@
   <el-dialog
     :model-value="visible"
     :title="dialogTitle"
-    width="60%"
-    @close="handleCancel"
+    width="80%"
     :close-on-click-modal="false"
+    class="global-dialog wildcards-dialog"
+    :style="dialogStyle"
+    @close="handleCancel"
   >
-    <div class="wildcards-container" style="max-height: 60vh; overflow-y: auto; padding: 0 10px;">
-      <!-- 添加说明文字 -->
-      <div class="tips" style="margin-bottom: 20px; padding: 12px; background: #f5f7fa; border-radius: 4px;">
-        <div style="font-weight: bold; margin-bottom: 8px;">填写说明：</div>
-        <div style="color: #666; font-size: 14px; line-height: 1.6;">
+    <div class="wildcards-container">
+      <div class="tips">
+        <div class="tips-title">填写说明：</div>
+        <div class="tips-content">
           1. 请根据剧本内容和风格，填写以下空缺内容<br>
           2. 您可以选择预设选项，或输入自定义内容<br>
           3. 所有项目都必须填写才能继续
@@ -19,19 +20,16 @@
       
       <div v-for="(wc, index) in wildcards" 
            :key="index" 
-           class="wildcard-item"
-           style="margin-bottom: 24px; padding: 16px; border-radius: 8px; background: #f8f9fa;">
-        <div class="prompt" style="margin-bottom: 8px;">
-          <span class="index" style="color: #409eff; font-weight: bold; margin-right: 8px;">{{ index + 1 }}.</span>
-          <span class="prompt-text" style="font-weight: bold; color: #303133;">{{ wc.prompt }}</span>
+           class="wildcard-item">
+        <div class="prompt">
+          <span class="index">{{ index + 1 }}.</span>
+          <span class="prompt-text">{{ wc.prompt }}</span>
         </div>
         
-        <!-- 预设选项展示 -->
-        <div class="preset-options" style="margin-bottom: 10px;" v-if="wc.options.length > 0">
+        <div class="preset-options" v-if="wc.options.length > 0">
           <el-tag
             v-for="option in wc.options"
             :key="option"
-            style="margin-right: 8px; margin-bottom: 8px; cursor: pointer;"
             @click="selections[index] = option"
             :effect="selections[index] === option ? 'dark' : 'plain'"
           >
@@ -42,7 +40,6 @@
         <el-input
           v-model="selections[index]"
           :placeholder="wc.options.length ? '选择预设或输入自定义内容' : '请输入内容'"
-          style="width: 100%;"
         >
           <template #append v-if="selections[index]">
             <el-button @click="selections[index] = ''">
@@ -54,11 +51,11 @@
     </div>
 
     <template #footer>
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="color: #f56c6c; font-size: 14px;" v-if="hasEmptyFields">
+      <div class="dialog-footer">
+        <span class="error-tip" v-if="hasEmptyFields">
           <el-icon><Warning /></el-icon> 请填写所有必填项
         </span>
-        <div>
+        <div class="buttons">
           <el-button @click="handleCancel">取消</el-button>
           <el-button type="primary" @click="handleConfirm" :disabled="hasEmptyFields">
             确认选择
@@ -121,24 +118,125 @@ export default {
       emit('cancel');
     };
 
+    const dialogStyle = {
+      '--el-dialog-width': '80%',
+      '--el-dialog-max-width': '701px',
+      '--el-dialog-margin-top': '5vh'
+    };
+
     return {
       visible,
       selections,
       hasEmptyFields,
       dialogTitle,
       handleConfirm,
-      handleCancel
+      handleCancel,
+      dialogStyle
     };
   }
 };
 </script>
 
-<style>
+<style scoped>
+:deep(.el-dialog) {
+  max-width: var(--el-dialog-max-width);
+  margin: var(--el-dialog-margin-top) auto 0;
+}
+
+.wildcards-container {
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 0 10px;
+}
+
+.tips {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: var(--el-fill-color-light);
+  border-radius: 8px;
+}
+
+.tips-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: var(--el-text-color-primary);
+}
+
+.tips-content {
+  color: var(--el-text-color-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.wildcard-item {
+  margin-bottom: 24px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--el-fill-color-light);
+}
+
+.prompt {
+  margin-bottom: 12px;
+}
+
+.index {
+  color: var(--el-color-primary);
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.prompt-text {
+  font-weight: bold;
+  color: var(--el-text-color-primary);
+}
+
+.preset-options {
+  margin-bottom: 12px;
+}
+
 .el-tag {
+  margin-right: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
   transition: all 0.3s;
 }
+
 .el-tag:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.error-tip {
+  color: var(--el-color-danger);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.buttons {
+  display: flex;
+  gap: 12px;
+}
+
+@media screen and (max-width: 768px) {
+  :deep(.el-dialog) {
+    width: 90% !important;
+    margin: 3vh auto 0;
+  }
+  
+  .wildcards-container {
+    padding: 0 5px;
+  }
+  
+  .wildcard-item {
+    padding: 12px;
+  }
 }
 </style> 
