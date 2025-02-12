@@ -122,49 +122,88 @@ function showConfirm(preview, script, options = {}) {
  * @returns {Promise} 返回最终的 ElMessageBox.confirm Promise
  */
 function confirmUseScript(script, options = {}) {
-  // 原始剧本文本
   const rawContent = script.content || '';
-
-  // 基本预览内容（原始剧本文本加上作者/标签信息，仅用于预览）
-  let basePreview = rawContent;
-  if (script.authorLink) {
-    if (script.authorName) {
-      basePreview += `<br/><a href="${script.authorLink}" target="_blank" rel="noopener" style="color: blue; text-decoration: underline;">作者：${script.authorName}</a>`;
-    } else {
-      basePreview += `<br/><a href="${script.authorLink}" target="_blank" rel="noopener" style="color: blue; text-decoration: underline;">作者链接</a>`;
-    }
-  } else if (script.tags && script.tags.length) {
-    basePreview += `<br/><span>标签：${script.tags.join(', ')}</span>`;
-  }
-
-  // 先提取剧本中的通配符（仅从原始剧本文本中提取，不包含附加内容）
   const wildcards = extractWildcards(rawContent);
-  console.log('wildcards', wildcards);
-  if (wildcards.length === 0) {
-    // 没有通配符需要填写，直接显示预览但最终返回原始剧本文本（去除附加内容）
-    return showConfirm(basePreview, script, options)
-      .then(() => rawContent);
-  } else {
-    // 有通配符：先显示初始预览对话框，预览内容中用 {提示} 替换通配符（不暴露选项和模板）
-    const initialPreview = basePreview.replace(wildcardRegex, (match, prompt, optionsStr, template) => {
-      return `{${prompt.trim()}}`;
-    });
-    return showConfirm(initialPreview, script, options)
-      .then(() => {
-        return promptWildcards(wildcards)
-          .then(selections => {
-            // 使用原始剧本文本进行通配符替换，去除附加的作者/标签信息
-            const finalPreview = fillWildcards(rawContent, selections);
-            // 显示最终确认对话框，告知玩家填写后的最终效果
-            return showConfirm(finalPreview, script, {
-              title: script.title ? `剧本最终预览 - ${script.title}` : '剧本最终预览',
-              confirmButtonText: '确定使用该剧本',
-              cancelButtonText: '取消'
-            })
-            .then(() => finalPreview);
-          });
-      });
+
+  // 构建初始预览HTML，让通配符更醒目
+  let previewHtml = rawContent.replace(wildcardRegex, (match, prompt, optionsStr, template) => {
+    return `<span class="wildcard-placeholder" style="background-color: #f0f9ff; padding: 2px 6px; border-radius: 4px; border: 1px dashed #409eff;" title="点击下一步后填写：${prompt.trim()}">${prompt.trim()}</span>`;
+  });
+
+  // 添加作者信息和标签
+  if (script.authorLink || (script.tags && script.tags.length)) {
+    previewHtml += `<hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;">`;
+    if (script.authorLink) {
+      previewHtml += `<div style="color: #666; font-size: 14px;">`;
+      if (script.authorName) {
+        previewHtml += `作者：<a href="${script.authorLink}" target="_blank" style="color: #409eff;">${script.authorName}</a>`;
+      } else {
+        previewHtml += `<a href="${script.authorLink}" target="_blank" style="color: #409eff;">作者链接</a>`;
+      }
+      previewHtml += '</div>';
+    }
+    if (script.tags && script.tags.length) {
+      previewHtml += `<div style="color: #666; font-size: 14px; margin-top: 5px;">标签：${script.tags.join(', ')}</div>`;
+    }
   }
+
+  // 添加提示信息
+  if (wildcards.length > 0) {
+    previewHtml = `
+      <div style="margin-bottom: 15px; padding: 8px 12px; background: #fdf6ec; border-radius: 4px; color: #e6a23c;">
+        <i class="el-icon-info" style="margin-right: 8px;"></i>
+        这个剧本包含 ${wildcards.length} 处需要填写的内容，确认后将进入填写界面
+      </div>
+    ` + previewHtml;
+  }
+
+  // 先显示预览
+  return showConfirm(previewHtml, script, {
+    title: script.title ? `剧本预览 - ${script.title}` : '剧本预览',
+    confirmButtonText: wildcards.length > 0 ? '下一步' : '使用该剧本',
+    cancelButtonText: '取消',
+    customClass: 'preview-dialog-initial',
+    showClose: true,
+  }).then(() => {
+    if (wildcards.length === 0) {
+      return rawContent;
+    }
+
+    // 有通配符时，显示填写界面
+    return promptWildcards(wildcards)
+      .then(selections => {
+        const finalContent = fillWildcards(rawContent, selections);
+        
+        // 显示最终预览
+        let finalPreview = finalContent;
+        
+        // 添加作者和标签信息
+        if (script.authorLink || (script.tags && script.tags.length)) {
+          finalPreview += `<hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;">`;
+          if (script.authorLink) {
+            finalPreview += `<div style="color: #666; font-size: 14px;">`;
+            if (script.authorName) {
+              finalPreview += `作者：<a href="${script.authorLink}" target="_blank" style="color: #409eff;">${script.authorName}</a>`;
+            } else {
+              finalPreview += `<a href="${script.authorLink}" target="_blank" style="color: #409eff;">作者链接</a>`;
+            }
+            finalPreview += '</div>';
+          }
+          if (script.tags && script.tags.length) {
+            finalPreview += `<div style="color: #666; font-size: 14px; margin-top: 5px;">标签：${script.tags.join(', ')}</div>`;
+          }
+        }
+
+        // 显示最终确认对话框
+        return showConfirm(finalPreview, script, {
+          title: '确认使用该剧本',
+          confirmButtonText: '确定使用',
+          cancelButtonText: '返回修改',
+          customClass: 'preview-dialog-final',
+          showClose: true,
+        }).then(() => finalContent);
+      });
+  });
 }
 
 export default confirmUseScript; 
