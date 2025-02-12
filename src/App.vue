@@ -568,7 +568,7 @@ export default {
       if (this.apiUrl === 'https://api.siliconflow.cn/v1/chat/completions') {
         return '当前选择的是硅基流动接口 请使用硅基流动的Key';
       } else if (this.apiUrl === 'https://api.deepseek.com/v1/chat/completions') {
-        return '注意，Deepseek 官方接口 还并未支持，请勿使用。官方接口写起来有点麻烦）';
+        return '当前选择的是Deepseek官方接口 请使用Deepseek官网的Key';
       } else {
         return '';
       }
@@ -730,15 +730,6 @@ export default {
         this.errorMessage = '';
         this.abortController = new AbortController();
 
-        const assistantMessage = {
-          role: 'assistant',
-          content: '',
-          reasoning_content: '',
-          isReasoningCollapsed: this.defaultHideReasoning,
-          timestamp: new Date().toISOString()
-        };
-        this.currentChat.messages.push(assistantMessage);
-
         const requestBody = {
           model: this.effectiveModel,
           messages: this.currentChat.messages.map(msg => ({
@@ -765,6 +756,15 @@ export default {
           throw new Error(`API请求失败: ${response.status} - ${errorBody}`);
         }
 
+        const assistantMessage = {
+          role: 'assistant',
+          content: '',
+          reasoning_content: '',
+          isReasoningCollapsed: this.defaultHideReasoning,
+          timestamp: new Date().toISOString()
+        };
+        this.currentChat.messages.push(assistantMessage);
+        
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
 
