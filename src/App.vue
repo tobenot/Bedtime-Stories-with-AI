@@ -216,18 +216,6 @@
                 </template>
               </div>
             </template>
-            <template v-if="msg.isEditing">
-              <el-input
-                v-model="msg.editContent"
-                type="textarea"
-                :autosize="{ minRows: 2, maxRows: 10 }"
-                placeholder="编辑消息内容..."
-              ></el-input>
-              <div class="edit-controls mt-2 flex justify-start">
-                <el-button type="primary" @click="saveEditedMessage(index)">保存</el-button>
-                <el-button @click="cancelEditMessage(index)">取消</el-button>
-              </div>
-            </template>
           </div>
           <div v-if="isTyping" class="message-bubble assistant-message">
             <div class="typing-indicator">
@@ -502,6 +490,30 @@
     accept=".json"
     @change="handleImportFile"
   />
+
+  <!-- 修改编辑消息弹窗 -->
+  <el-dialog
+    v-model="showEditDialog"
+    title="编辑消息"
+    width="80%"
+    :before-close="handleEditDialogClose"
+    @opened="handleEditDialogOpened"
+  >
+    <el-input
+      ref="editInput"
+      v-model="editingMessage.content"
+      type="textarea"
+      :rows="10"
+      :autosize="{ minRows: 10, maxRows: 20 }"
+      placeholder="编辑消息内容..."
+    ></el-input>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="handleEditDialogClose">取消</el-button>
+        <el-button type="primary" @click="saveEditedMessageDialog">保存</el-button>
+      </span>
+    </template>
+  </el-dialog>
 </template>
 
 <script>
@@ -559,6 +571,11 @@ export default {
       showScrollToBottom: false,
       abortController: null,
       cancelled: false,
+      showEditDialog: false,
+      editingMessage: {
+        index: null,
+        content: ''
+      }
     }
   },
   computed: {
@@ -965,15 +982,33 @@ export default {
       this.saveChatHistory();
     },
     enableEditMessage(index) {
-      this.currentChat.messages[index].isEditing = true;
-      this.currentChat.messages[index].editContent = this.currentChat.messages[index].content;
+      this.editingMessage = {
+        index: index,
+        content: this.currentChat.messages[index].content
+      };
+      this.showEditDialog = true;
+      this.$nextTick(() => {
+        this.scrollToBottomManual();
+      });
     },
-    saveEditedMessage(index) {
-      const editedContent = this.currentChat.messages[index].editContent.trim();
+    handleEditDialogClose() {
+      this.showEditDialog = false;
+      this.editingMessage = {
+        index: null,
+        content: ''
+      };
+    },
+    saveEditedMessageDialog() {
+      const editedContent = this.editingMessage.content.trim();
       if (editedContent) {
-        this.currentChat.messages[index].content = editedContent;
-        this.currentChat.messages[index].isEditing = false;
+        this.currentChat.messages[this.editingMessage.index].content = editedContent;
         this.saveChatHistory();
+        this.$message({
+          message: '消息已更新',
+          type: 'success',
+          duration: 2000
+        });
+        this.handleEditDialogClose();
       } else {
         this.$message({
           message: '消息内容不能为空',
@@ -981,10 +1016,6 @@ export default {
           duration: 2000
         });
       }
-    },
-    cancelEditMessage(index) {
-      this.currentChat.messages[index].isEditing = false;
-      delete this.currentChat.messages[index].editContent;
     },
     confirmRegenerateMessage() {
       const messages = this.currentChat && this.currentChat.messages ? this.currentChat.messages : [];
@@ -1160,6 +1191,18 @@ export default {
         message: '对话已复制',
         type: 'success',
         duration: 2000
+      });
+    },
+    handleEditDialogOpened() {
+      // 等待DOM更新后执行滚动
+      this.$nextTick(() => {
+        const textarea = this.$refs.editInput.$el.querySelector('textarea');
+        if (textarea) {
+          textarea.scrollTop = textarea.scrollHeight;
+          // 将光标定位到文本末尾
+          textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+          textarea.focus();
+        }
       });
     },
   }
