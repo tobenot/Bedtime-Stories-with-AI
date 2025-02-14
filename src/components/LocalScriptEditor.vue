@@ -260,14 +260,8 @@ export default {
       }).catch(() => {});
     },
     previewScript(script) {
-      confirmUseScript(script, { confirmButtonText: '使用该剧本', title: `剧本预览 - ${script.title}` })
-        .then(() => {
-          this.$emit('script-selected', script);
-          this.internalVisible = false;
-        })
-        .catch(() => {
-          // 用户取消操作，可根据需要处理
-        });
+      this.$emit('script-selected', script);
+      this.internalVisible = false;
     },
     exportScripts() {
       const dataStr = JSON.stringify(this.localScripts, null, 2);
