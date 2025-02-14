@@ -9,8 +9,24 @@
  *    title {String} 小说标题，默认 ''
  *    author {String} 小说作者，默认 ''
  *    dateTime {String} 小说创作时间，默认 ''
+ *    stripMarkdown {Boolean} 是否去除Markdown格式，默认 true
+ *    description {String} 小说简介，默认 ''
  * @returns {String} 拼接好的文本内容
  */
+
+// Helper function：去除Markdown格式
+function removeMarkdown(text) {
+  return text
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/\*\*(.*?)\*\*/gm, '$1')
+    .replace(/\*(.*?)\*/gm, '$1')
+    .replace(/__(.*?)__/gm, '$1')
+    .replace(/_(.*?)_/gm, '$1')
+    .replace(/`([^`]+)`/gm, '$1')
+    .replace(/~~(.*?)~~/gm, '$1')
+    .replace(/\[(.*?)\]\((.*?)\)/gm, '$1');
+}
+
 export async function exportChatToTxtNovel(chat, options = {}) {
   const {
     includePrefix = false,
@@ -19,12 +35,14 @@ export async function exportChatToTxtNovel(chat, options = {}) {
     onlyAssistant = false,
     title = '',
     author = '',
+    description = '',
     dateTime = '',
+    stripMarkdown = true,
   } = options;
 
   let text = '';
   // 添加头部信息
-  if (title || author || dateTime) {
+  if (title || author || dateTime || description) {
     if (title) {
       text += "标题：" + title + "\n";
     }
@@ -35,6 +53,9 @@ export async function exportChatToTxtNovel(chat, options = {}) {
       text += "时间：" + dateTime + "\n";
     }
     text += "\n";
+    if (description) {
+      text += "简介：" + description + "\n\n\n";
+    }
   }
 
   for (const msg of chat.messages) {
@@ -43,15 +64,17 @@ export async function exportChatToTxtNovel(chat, options = {}) {
       continue;
     }
 
+    // 先处理去掉markdown格式（若启用）
+    const content = stripMarkdown ? removeMarkdown(msg.content) : msg.content;
     let line = '';
     if (includePrefix) {
       if (msg.role === 'user') {
-        line = prefixUser + "\n" + msg.content;
+        line = prefixUser + "\n" + content;
       } else if (msg.role === 'assistant') {
-        line = prefixAssistant + "\n" + msg.content;
+        line = prefixAssistant + "\n" + content;
       }
     } else {
-      line = msg.content;
+      line = content;
     }
     // 如果消息为助手，则追加三个换行符（两空行），否则追加两个换行符（一空行）
     if (msg.role === 'assistant') {
