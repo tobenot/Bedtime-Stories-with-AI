@@ -829,7 +829,10 @@ export default {
           });
         } else {
           this.errorMessage = `请求失败: ${error.message}`;
-          this.currentChat.messages.pop();
+          if (this.currentChat.messages.length > 0 && 
+              this.currentChat.messages[this.currentChat.messages.length - 1].role === 'assistant') {
+            this.currentChat.messages.pop();
+          }
         }
       } finally {
         this.isLoading = false;
