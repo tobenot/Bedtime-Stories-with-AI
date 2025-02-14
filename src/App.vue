@@ -86,6 +86,7 @@
               <el-dropdown-menu>
                 <el-dropdown-item command="copyChat">复制对话(开if线)</el-dropdown-item>
                 <el-dropdown-item command="localScriptEditor">本地剧本编辑器</el-dropdown-item>
+                <el-dropdown-item command="exportTxtNovel">导出txt小说</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -514,6 +515,9 @@
       </span>
     </template>
   </el-dialog>
+
+  <!-- 新增：导出txt小说组件 -->
+  <TxtNovelExporter :modelValue.sync="showTxtNovelExporter" :chat="currentChat" />
 </template>
 
 <script>
@@ -523,6 +527,7 @@ import html2pdf from 'html2pdf.js';
 import ChatItem from './components/ChatItem.vue';
 import ScriptSelector from './components/ScriptSelector.vue';
 import LocalScriptEditor from './components/LocalScriptEditor.vue';
+import TxtNovelExporter from './components/TxtNovelExporter.vue';
 import scripts from './config/scripts.js';
 import { exportChatToPDF } from './utils/pdfExporter';
 import { MAX_TITLE_LENGTH, COPY_SUFFIX } from '@/config/constants.js';
@@ -533,6 +538,7 @@ export default {
     ChatItem,
     ScriptSelector,
     LocalScriptEditor,
+    TxtNovelExporter,
   },
   data() {
     return {
@@ -575,7 +581,8 @@ export default {
       editingMessage: {
         index: null,
         content: ''
-      }
+      },
+      showTxtNovelExporter: false,
     }
   },
   computed: {
@@ -1163,10 +1170,16 @@ export default {
       }
     },
     handleToolboxCommand(command) {
+      console.log("Received toolbox command:", command);
       if (command === 'copyChat') {
         this.copyCurrentChat();
       } else if (command === 'localScriptEditor') {
         this.showLocalScriptEditor = true;
+      } else if (command === 'exportTxtNovel') {
+        this.showTxtNovelExporter = false;
+        this.$nextTick(() => {
+          this.showTxtNovelExporter = true;
+        });
       }
     },
     generateCopyTitle(originalTitle) {
