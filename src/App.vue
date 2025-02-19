@@ -337,13 +337,13 @@
             class="custom-slider"
             v-model="temperature"
             :min="0"
-            :max="1"
+            :max="2"
             :step="0.1"
             show-tooltip
             @change="saveTemperature"
           ></el-slider>
           <div class="mt-1 text-gray-600 text-sm">
-            温度参数决定回答的随机性。较低的温度（如0.3）使回答更确定，而较高的温度（如0.7）则使回答更具创造性和随机性。玩文游建议0.7，你可以进行尝试。
+            温度参数决定回答的随机性。较低的温度（如0.3）使回答更确定，而较高的温度（如1）则使回答更具创造性和随机性。玩文游建议0.7，你可以进行尝试。
           </div>
         </el-form-item>
 
@@ -852,7 +852,9 @@ export default {
     renderMarkdown(content) {
       if (!content) return '';
       try {
-        return marked.parse(content);
+        const renderer = new marked.Renderer();
+        renderer.del = (text) => `~${text}~`;
+        return marked.parse(content, { renderer });
       } catch (error) {
         console.error('Markdown 渲染错误:', error);
         return content;
@@ -997,9 +999,6 @@ export default {
         content: this.currentChat.messages[index].content
       };
       this.showEditDialog = true;
-      this.$nextTick(() => {
-        this.scrollToBottomManual();
-      });
     },
     handleEditDialogClose() {
       this.showEditDialog = false;
