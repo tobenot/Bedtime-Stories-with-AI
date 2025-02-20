@@ -12,9 +12,8 @@
       <div class="tips">
         <div class="tips-title">填写说明：</div>
         <div class="tips-content">
-          1. 请根据剧本内容和风格，填写以下空缺内容<br>
-          2. 您可以选择预设选项，或输入自定义内容<br>
-          3. 所有项目都必须填写才能继续
+          1. 请根据剧本内容和风格，填写以下选项（可留空）<br>
+          2. 您可以选择预设选项，或输入自定义内容
         </div>
       </div>
       
@@ -59,12 +58,9 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <span class="error-tip" v-if="hasEmptyFields">
-          <el-icon><Warning /></el-icon> 请填写所有必填项
-        </span>
         <div class="buttons">
           <el-button @click="handleCancel">取消</el-button>
-          <el-button type="primary" @click="handleConfirm" :disabled="hasEmptyFields">
+          <el-button type="primary" @click="handleConfirm">
             确认选择
           </el-button>
         </div>
@@ -107,15 +103,7 @@ export default {
       selections[index] = wc.defaultValue;
     });
 
-    // 检查是否有空字段
-    const hasEmptyFields = computed(() => {
-      return Object.values(selections).some(value => !value || value.trim() === '');
-    });
-
     const handleConfirm = () => {
-      if (hasEmptyFields.value) {
-        return;
-      }
       visible.value = false;
       emit('confirm', { ...selections });
     };
@@ -134,7 +122,6 @@ export default {
     return {
       visible,
       selections,
-      hasEmptyFields,
       dialogTitle,
       handleConfirm,
       handleCancel,
