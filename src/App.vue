@@ -30,7 +30,7 @@
     <!-- 移动端侧边栏 -->
     <div
       class="sidebar fixed left-0 w-82 bg-gray-50 border-r flex flex-col md:hidden z-50 top-16 bottom-0"
-      v-if="showSidebar"
+      v-show="showSidebar"
     >
       <!-- 侧边栏内容保持不变 -->
       <div class="sidebar-header p-4 border-b">
@@ -73,7 +73,7 @@
           <el-icon><Expand /></el-icon>
         </button>
         <div class="flex items-center gap-2">
-          <h2 class="text-lg text-white font-medium">{{ currentChat?.title || '与AI的睡前故事' }}</h2>
+          <h2 class="truncate text-lg text-white font-medium">{{ currentChat?.title || '与AI的睡前故事' }}</h2>
         </div>
         <div class="header-actions flex items-center gap-4">
           <el-dropdown trigger="click" @command="handleToolboxCommand">
