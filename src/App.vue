@@ -532,6 +532,7 @@ import scripts from './config/scripts.js';
 import { exportChatToPDF } from './utils/pdfExporter';
 import { MAX_TITLE_LENGTH, COPY_SUFFIX } from '@/config/constants.js';
 import confirmUseScript from './utils/scriptPreview.js';
+import { callAiModel } from '@/utils/aiService';
 
 export default {
   components: {
@@ -720,6 +721,8 @@ export default {
       });
     },
     async sendMessage(isRegenerate = false) {
+      this.abortController = new AbortController();
+      
       if (isRegenerate) {
         while (
           this.currentChat.messages.length > 0 &&
@@ -730,7 +733,7 @@ export default {
         this.saveChatHistory();
       } else {
         if (!this.inputMessage.trim() || this.isLoading || !this.apiKey) return;
-        var message = this.inputMessage.trim();
+        const message = this.inputMessage.trim();
         this.inputMessage = '';
         this.updateChatTitle(message);
         const userMessage = {
@@ -749,38 +752,19 @@ export default {
         });
       }
 
+      // 整理当前对话中的消息
+      const requestMessages = this.currentChat.messages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+
       try {
         this.isLoading = true;
         this.isTyping = true;
         this.errorMessage = '';
-        this.abortController = new AbortController();
 
-        const requestBody = {
-          model: this.effectiveModel,
-          messages: this.currentChat.messages.map(msg => ({
-            role: msg.role,
-            content: msg.content
-          })),
-          stream: true,
-          temperature: this.temperature,
-          max_tokens: 4096
-        };
-
-        const response = await fetch(this.apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${this.apiKey}`
-          },
-          signal: this.abortController.signal,
-          body: JSON.stringify(requestBody)
-        });
-
-        if (!response.ok) {
-          const errorBody = await response.text();
-          throw new Error(`API请求失败: ${response.status} - ${errorBody}`);
-        }
-
+        // 创建 assistant 消息用于实时展示，但暂不直接插入到聊天记录中，
+        // 确保传给 AI 的消息最后一条为用户消息，等首次接收到流数据时再插入 assistant 消息。
         const assistantMessage = {
           role: 'assistant',
           content: '',
@@ -788,44 +772,29 @@ export default {
           isReasoningCollapsed: this.defaultHideReasoning,
           timestamp: new Date().toISOString()
         };
-        this.currentChat.messages.push(assistantMessage);
-        
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
+        let assistantMessagePushed = false;
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n').filter(line => line.trim());
-
-          for (const line of lines) {
-            if (line === 'data: [DONE]') break;
-            try {
-              const jsonStr = line.replace('data: ', '');
-              if (!jsonStr.trim()) continue;
-              const data = JSON.parse(jsonStr);
-
-              if (data.code) {
-                console.error('API 错误:', data.message);
-                throw new Error(`API returned error: ${data.message}`);
-              }
-
-              const currentMessage = this.currentChat.messages[this.currentChat.messages.length - 1];
-
-              if (data.choices[0]?.delta?.reasoning_content !== undefined) {
-                currentMessage.reasoning_content += data.choices[0].delta.reasoning_content || '';
-              }
-              if (data.choices[0]?.delta?.content !== null && data.choices[0]?.delta?.content !== undefined) {
-                currentMessage.content += data.choices[0].delta.content || '';
-              }
-              this.currentChat.messages = [...this.currentChat.messages];
-              this.scrollToBottom();
-            } catch (error) {
-              console.error('数据解析错误:', error, '原始数据:', line);
+        // 调用工具类发起 AI 模型请求（流式返回）
+        await callAiModel({
+          apiUrl: this.apiUrl,
+          apiKey: this.apiKey,
+          model: this.effectiveModel,
+          messages: requestMessages,
+          temperature: this.temperature,
+          maxTokens: 4096,
+          signal: this.abortController.signal,
+          // 每次收到新的数据时更新 assistantMessage 并刷新 UI
+          onChunk: (updatedMessage) => {
+            // 当首次收到数据时，将 assistant 消息插入到聊天记录中
+            if (!assistantMessagePushed) {
+              this.currentChat.messages.push(assistantMessage);
+              assistantMessagePushed = true;
             }
+            Object.assign(assistantMessage, updatedMessage);
+            this.currentChat.messages = [...this.currentChat.messages];
+            this.scrollToBottom();
           }
-        }
+        });
         this.saveChatHistory();
       } catch (error) {
         if (error.name === 'AbortError') {
@@ -836,7 +805,7 @@ export default {
           });
         } else {
           this.errorMessage = `请求失败: ${error.message}`;
-          if (this.currentChat.messages.length > 0 && 
+          if (this.currentChat.messages.length > 0 &&
               this.currentChat.messages[this.currentChat.messages.length - 1].role === 'assistant') {
             this.currentChat.messages.pop();
           }
@@ -844,9 +813,6 @@ export default {
       } finally {
         this.isLoading = false;
         this.isTyping = false;
-        this.abortController = null;
-        this.cancelled = false;
-        this.scrollToBottom();
       }
     },
     renderMarkdown(content) {
