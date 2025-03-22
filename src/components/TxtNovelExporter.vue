@@ -59,6 +59,18 @@
             </span>
             <el-switch v-model="options.stripMarkdown" />
             </div>
+            
+            <!-- 新增：保留列表选项 -->
+            <div v-if="options.stripMarkdown" class="option-item">
+              <span class="option-label">
+                保留列表格式
+                <el-tooltip content="保留无序列表(-) 和有序列表(1.) 的格式" placement="top">
+                  <el-icon class="icon-small"><QuestionFilled /></el-icon>
+                </el-tooltip>
+              </span>
+              <el-switch v-model="options.preserveLists" />
+            </div>
+            
             <div class="option-item">
             <span class="option-label">
                 只导出AI回复
@@ -206,6 +218,7 @@ export default {
         prefixUser: '导演：',
         prefixAssistant: 'D老师：',
         onlyAssistant: false,
+        preserveLists: true,
       };
       
       return savedOptions ? { ...defaultOptions, ...JSON.parse(savedOptions) } : defaultOptions;
