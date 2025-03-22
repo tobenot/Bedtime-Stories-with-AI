@@ -7,49 +7,54 @@
     class="markdown-tool"
   >
     <div class="tool-container">
-      <div class="textarea-container">
-        <el-form>
-          <el-form-item label="输入文本">
-            <el-input 
-              type="textarea" 
-              v-model="inputText" 
-              :autosize="{ minRows: 6, maxRows: 12 }" 
-              placeholder="在此粘贴需要处理的Markdown文本..."
-            ></el-input>
-          </el-form-item>
-        </el-form>
+      <div class="main-section">
+        <div class="textarea-container">
+          <el-form>
+            <el-form-item label="输入文本">
+              <el-input 
+                type="textarea" 
+                v-model="inputText" 
+                :autosize="{ minRows: 8, maxRows: 12 }" 
+                placeholder="在此粘贴需要处理的Markdown文本..."
+                @input="autoProcess"
+              ></el-input>
+            </el-form-item>
+          </el-form>
+        </div>
+        
+        <div class="result-container">
+          <el-form>
+            <el-form-item label="处理结果">
+              <el-input 
+                type="textarea" 
+                v-model="outputText" 
+                :autosize="{ minRows: 8, maxRows: 12 }" 
+                readonly
+                placeholder="处理后的文本将显示在这里..."
+              ></el-input>
+            </el-form-item>
+          </el-form>
+        </div>
       </div>
       
       <div class="controls-container">
         <div class="action-buttons">
           <el-button type="primary" @click="processText">处理文本</el-button>
-          <el-button @click="resetText">重置</el-button>
-          <el-button @click="copyProcessedText" :disabled="!outputText">复制结果</el-button>
+          <el-button type="success" @click="copyProcessedText" :disabled="!outputText">复制结果</el-button>
         </div>
         <el-divider>处理选项</el-divider>
         <div class="options-grid">
+          <el-checkbox v-model="options.keepLists">保留列表 (- 和 1. 格式)</el-checkbox>
           <el-checkbox v-model="options.stripBold">去除加粗 (**文本**)</el-checkbox>
           <el-checkbox v-model="options.stripItalic">去除斜体 (*文本*)</el-checkbox>
           <el-checkbox v-model="options.stripHeadings">去除标题 (# 标题)</el-checkbox>
           <el-checkbox v-model="options.stripLinks">去除链接 ([文本](链接))</el-checkbox>
           <el-checkbox v-model="options.stripCode">去除代码 (`代码`)</el-checkbox>
           <el-checkbox v-model="options.stripStrikethrough">去除删除线 (~~文本~~)</el-checkbox>
-          <el-checkbox v-model="options.keepLists">保留列表 (- 和 1. 格式)</el-checkbox>
         </div>
-      </div>
-      
-      <div class="result-container">
-        <el-form>
-          <el-form-item label="处理结果">
-            <el-input 
-              type="textarea" 
-              v-model="outputText" 
-              :autosize="{ minRows: 6, maxRows: 12 }" 
-              readonly
-              placeholder="处理后的文本将显示在这里..."
-            ></el-input>
-          </el-form-item>
-        </el-form>
+        <div class="auto-process-option">
+          <el-checkbox v-model="autoProcessEnabled">实时处理</el-checkbox>
+        </div>
       </div>
     </div>
     
@@ -76,15 +81,15 @@ export default {
       inputText: '',
       outputText: '',
       options: {
+        keepLists: true,
         stripBold: true,
         stripItalic: true,
         stripHeadings: true,
         stripLinks: true,
         stripCode: true,
-        stripStrikethrough: true,
-        keepLists: true
+        stripStrikethrough: true
       },
-      originalText: '',
+      autoProcessEnabled: true
     }
   },
   computed: {
@@ -98,15 +103,27 @@ export default {
     },
     internalVisible(newVal) {
       this.$emit('update:modelValue', newVal);
+    },
+    options: {
+      handler() {
+        if (this.autoProcessEnabled && this.inputText) {
+          this.processText();
+        }
+      },
+      deep: true
     }
   },
   methods: {
+    autoProcess() {
+      if (this.autoProcessEnabled) {
+        this.processText();
+      }
+    },
+    
     processText() {
-      if (!this.inputText) return;
-      
-      // 保存原始文本用于恢复
-      if (!this.originalText) {
-        this.originalText = this.inputText;
+      if (!this.inputText) {
+        this.outputText = '';
+        return;
       }
       
       let processedText = this.inputText;
@@ -152,16 +169,6 @@ export default {
       this.outputText = processedText;
     },
     
-    resetText() {
-      if (this.originalText) {
-        this.inputText = this.originalText;
-        this.originalText = '';
-      } else {
-        this.inputText = '';
-      }
-      this.outputText = '';
-    },
-    
     copyProcessedText() {
       if (!this.outputText) return;
       
@@ -187,7 +194,6 @@ export default {
       this.internalVisible = false;
       this.inputText = '';
       this.outputText = '';
-      this.originalText = '';
     }
   }
 }
@@ -197,7 +203,13 @@ export default {
 .tool-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
+}
+
+.main-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
 .options-grid {
@@ -209,11 +221,21 @@ export default {
 
 .action-buttons {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   margin: 16px 0;
+  justify-content: center;
+}
+
+.auto-process-option {
+  margin-top: 8px;
+  text-align: center;
 }
 
 @media (max-width: 768px) {
+  .main-section {
+    grid-template-columns: 1fr;
+  }
+  
   .action-buttons {
     flex-direction: column;
   }
