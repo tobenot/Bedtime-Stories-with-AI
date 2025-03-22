@@ -87,7 +87,7 @@
                 <el-dropdown-item command="copyChat">复制对话(开if线)</el-dropdown-item>
                 <el-dropdown-item command="localScriptEditor">本地剧本编辑器</el-dropdown-item>
                 <el-dropdown-item command="exportTxtNovel">导出txt小说</el-dropdown-item>
-                <el-dropdown-item command="markdownTool">Markdown处理工具</el-dropdown-item>
+                <el-dropdown-item command="markdownTool">去星号（Markdown处理工具） </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>

@@ -1,13 +1,13 @@
 <template>
   <el-dialog 
     v-model="internalVisible" 
-    title="Markdown格式处理工具" 
+    title="去星号（Markdown格式处理工具）" 
     :width="dialogWidth"
-    :style="{ maxWidth: '800px' }"
+    :style="{ maxWidth: '900px' }"
     class="markdown-tool"
   >
     <div class="tool-container">
-      <div class="main-section">
+      <div class="text-content-section">
         <div class="textarea-container">
           <el-form>
             <el-form-item label="输入文本">
@@ -35,9 +35,8 @@
             </el-form-item>
           </el-form>
         </div>
-      </div>
-      
-      <div class="controls-container">
+
+        <div class="controls-section">
         <div class="action-buttons">
           <el-button type="primary" @click="processText">处理文本</el-button>
           <el-button type="success" @click="copyProcessedText" :disabled="!outputText">复制结果</el-button>
@@ -51,10 +50,9 @@
           <el-checkbox v-model="options.stripLinks">去除链接 ([文本](链接))</el-checkbox>
           <el-checkbox v-model="options.stripCode">去除代码 (`代码`)</el-checkbox>
           <el-checkbox v-model="options.stripStrikethrough">去除删除线 (~~文本~~)</el-checkbox>
-        </div>
-        <div class="auto-process-option">
           <el-checkbox v-model="autoProcessEnabled">实时处理</el-checkbox>
         </div>
+      </div>
       </div>
     </div>
     
@@ -89,13 +87,13 @@ export default {
         stripCode: true,
         stripStrikethrough: true
       },
-      autoProcessEnabled: true
+      autoProcessEnabled: true,
     }
   },
   computed: {
     dialogWidth() {
-      return window.innerWidth < 768 ? '95%' : '80%';
-    }
+      return window.innerWidth < 768 ? '95%' : '85%';
+    }   
   },
   watch: {
     modelValue(newVal) {
@@ -111,7 +109,7 @@ export default {
         }
       },
       deep: true
-    }
+    },
   },
   methods: {
     autoProcess() {
@@ -203,19 +201,23 @@ export default {
 .tool-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 }
 
-.main-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.controls-section {
+  padding: 0 16px;
+}
+
+.text-content-section {
+  display: flex;
+  flex-direction: column;
   gap: 20px;
 }
 
 .options-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
   margin-bottom: 16px;
 }
 
@@ -225,19 +227,37 @@ export default {
   margin: 16px 0;
   justify-content: center;
 }
-
-.auto-process-option {
-  margin-top: 8px;
-  text-align: center;
+/* 响应式设计 */
+@media (min-width: 769px) {
+  .text-content-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 20px;
+  }
+  
+  .textarea-container {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  
+  .result-container {
+    grid-column: 2;
+    grid-row: 1;
+  }
 }
 
 @media (max-width: 768px) {
-  .main-section {
-    grid-template-columns: 1fr;
+  .text-content-section {
+    flex-direction: column;
   }
   
   .action-buttons {
     flex-direction: column;
+  }
+  
+  .options-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 }
 </style> 
