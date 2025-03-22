@@ -338,9 +338,9 @@
           >
             <el-option
               v-for="option in apiUrlOptions"
-              :key="option"
-              :label="option"
-              :value="option"
+              :key="option.value"
+              :label="option.label"
+              :value="option.value"
             />
           </el-select>
           <div class="mt-1 text-gray-600 text-sm">
@@ -576,8 +576,7 @@ export default {
       model: localStorage.getItem('model') || 'deepseek-ai/DeepSeek-R1',
       models: [
         'deepseek-ai/DeepSeek-R1',
-        'deepseek-ai/DeepSeek-V3',
-        'meta-llama/Llama-3.3-70B-Instruct'
+        'deepseek-ai/DeepSeek-V3'
       ],
       temperature: localStorage.getItem('temperature')
         ? parseFloat(localStorage.getItem('temperature'))
@@ -601,8 +600,9 @@ export default {
       importMode: null,
       apiUrl: localStorage.getItem('api_url') || 'https://api.siliconflow.cn/v1/chat/completions',
       apiUrlOptions: [
-        'https://api.siliconflow.cn/v1/chat/completions',
-        'https://api.deepseek.com/v1/chat/completions'
+        { label: '硅基流动', value: 'https://api.siliconflow.cn/v1/chat/completions' },
+        { label: '官方', value: 'https://api.deepseek.com/v1/chat/completions' },
+        { label: '火山引擎', value: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions' }
       ],
       showScrollToBottom: false,
       abortController: null,
@@ -624,6 +624,8 @@ export default {
         return '当前选择的是硅基流动接口 请使用硅基流动的Key';
       } else if (this.apiUrl === 'https://api.deepseek.com/v1/chat/completions') {
         return '当前选择的是Deepseek官方接口 请使用Deepseek官网的Key';
+      } else if (this.apiUrl === 'https://ark.cn-beijing.volces.com/api/v3/chat/completions') {
+        return '当前选择的是火山引擎接口 请使用火山引擎的Key';
       } else {
         return '';
       }
@@ -634,6 +636,12 @@ export default {
           return 'deepseek-reasoner';
         } else if (this.model === 'deepseek-ai/DeepSeek-V3') {
           return 'deepseek-chat';
+        }
+      } else if (this.apiUrl === 'https://ark.cn-beijing.volces.com/api/v3/chat/completions') {
+        if (this.model === 'deepseek-ai/DeepSeek-R1') {
+          return 'deepseek-r1-250120';
+        } else if (this.model === 'deepseek-ai/DeepSeek-V3') {
+          return 'deepseek-v3-241226';
         }
       }
       return this.model;
