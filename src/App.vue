@@ -87,6 +87,7 @@
                 <el-dropdown-item command="copyChat">复制对话(开if线)</el-dropdown-item>
                 <el-dropdown-item command="localScriptEditor">本地剧本编辑器</el-dropdown-item>
                 <el-dropdown-item command="exportTxtNovel">导出txt小说</el-dropdown-item>
+                <el-dropdown-item command="markdownTool">Markdown处理工具</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -518,6 +519,9 @@
 
   <!-- 新增：导出txt小说组件 -->
   <TxtNovelExporter :modelValue.sync="showTxtNovelExporter" :chat="currentChat" />
+
+  <!-- 新增：Markdown处理工具 -->
+  <MarkdownTool v-model="showMarkdownTool" />
 </template>
 
 <script>
@@ -528,6 +532,7 @@ import ChatItem from './components/ChatItem.vue';
 import ScriptSelector from './components/ScriptSelector.vue';
 import LocalScriptEditor from './components/LocalScriptEditor.vue';
 import TxtNovelExporter from './components/TxtNovelExporter.vue';
+import MarkdownTool from './components/MarkdownTool.vue';
 import scripts from './config/scripts.js';
 import { exportChatToPDF } from './utils/pdfExporter';
 import { MAX_TITLE_LENGTH, COPY_SUFFIX } from '@/config/constants.js';
@@ -540,6 +545,7 @@ export default {
     ScriptSelector,
     LocalScriptEditor,
     TxtNovelExporter,
+    MarkdownTool,
   },
   data() {
     return {
@@ -565,6 +571,7 @@ export default {
       showAuthorInfo: false,
       showScriptPanel: false,
       showLocalScriptEditor: false,
+      showMarkdownTool: false,
       scripts: scripts,
       defaultHideReasoning: JSON.parse(localStorage.getItem('default_hide_reasoning') || 'false'),
       autoCollapseReasoning: JSON.parse(localStorage.getItem('auto_collapse_reasoning') || 'false'),
@@ -1145,6 +1152,8 @@ export default {
         this.$nextTick(() => {
           this.showTxtNovelExporter = true;
         });
+      } else if (command === 'markdownTool') {
+        this.showMarkdownTool = true;
       }
     },
     generateCopyTitle(originalTitle) {
