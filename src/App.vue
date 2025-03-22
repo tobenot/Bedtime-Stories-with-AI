@@ -20,9 +20,17 @@
         />
       </div>
       
-      <div class="qq-groups p-4 border-t mt-4">
-        <el-button class="btn-small w-full" @click="joinGroup('作者粉丝群')">
-          加入交流群【丶青萝卜的母港】
+      <!-- 相关链接区域 -->
+      <div class="related-links p-4 border-t mt-2">
+        <h3 class="text-md font-semibold text-gray-700 mb-2">相关链接</h3>
+        <el-button class="btn-small w-full mb-2" @click="openExternalLink('https://tobenot.itch.io/beyond-books')">
+          <el-icon><VideoPlay /></el-icon> AI剧本杀游戏（AI NPC和主持人）
+        </el-button>
+        <el-button class="btn-small w-full mb-2" @click="openExternalLink('https://tobenot.top/Epitaph/')">
+          <el-icon><Collection /></el-icon> 作者作品集（游戏/小说/动漫）
+        </el-button>
+        <el-button class="btn-small w-full" @click="openExternalLink('https://www.xiaohongshu.com/user/profile/5c03942800000000050142ab')">
+          <el-icon><Promotion /></el-icon> 关注小红书，更新提示词工具
         </el-button>
       </div>
     </div>
@@ -50,9 +58,17 @@
         />
       </div>
       
-      <div class="qq-groups p-4 border-t mt-4">
-        <el-button class="btn-small w-full" @click="joinGroup('作者粉丝群')">
-          加入交流群【丶青萝卜的母港】
+      <!-- 相关链接区域 (移动端) -->
+      <div class="related-links p-4 border-t mt-2">
+        <h3 class="text-md font-semibold text-gray-700 mb-2">相关链接</h3>
+        <el-button class="btn-small w-full mb-2" @click="openExternalLink('https://tobenot.itch.io/beyond-books')">
+          <el-icon><VideoPlay /></el-icon> AI剧本杀游戏（AI NPC和主持人）
+        </el-button>
+        <el-button class="btn-small w-full mb-2" @click="openExternalLink('https://tobenot.top/Epitaph/')">
+          <el-icon><Collection /></el-icon> 作者作品集（游戏/小说/动漫）
+        </el-button>
+        <el-button class="btn-small w-full" @click="openExternalLink('https://www.xiaohongshu.com/user/profile/5c03942800000000050142ab')">
+          <el-icon><Promotion /></el-icon> 小红书会更新提示词工具
         </el-button>
       </div>
     </div>
@@ -443,6 +459,12 @@
             <a href="https://www.xiaohongshu.com/user/profile/5c03942800000000050142ab" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
               <el-icon><Picture /></el-icon> 小红书
             </a>
+            <a href="https://tobenot.top/Epitaph/experience" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
+              <el-icon><Collection /></el-icon> 作品集
+            </a>
+            <a href="https://tobenot.itch.io/beyond-books" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
+              <el-icon><VideoPlay /></el-icon> AI剧本杀
+            </a>
           </div>
         </div>
       </el-tab-pane>
@@ -526,7 +548,7 @@
 
 <script>
 import { marked } from 'marked';
-import { Refresh, CopyDocument, Delete, Edit, Briefcase, Setting, Expand } from '@element-plus/icons-vue';
+import { Refresh, CopyDocument, Delete, Edit, Briefcase, Setting, Expand, VideoPlay, Collection, Promotion, ChatDotRound } from '@element-plus/icons-vue';
 import html2pdf from 'html2pdf.js';
 import ChatItem from './components/ChatItem.vue';
 import ScriptSelector from './components/ScriptSelector.vue';
@@ -1194,6 +1216,9 @@ export default {
           textarea.focus();
         }
       });
+    },
+    openExternalLink(url) {
+      window.open(url, '_blank');
     },
   }
 }
