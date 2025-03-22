@@ -7,48 +7,49 @@
     class="markdown-tool"
   >
     <div class="tool-container">
-      <div class="content-wrapper">
-        <div class="input-section">
-          <el-form>
-            <el-form-item label="输入文本">
-              <el-input 
-                type="textarea" 
-                v-model="inputText" 
-                :autosize="{ minRows: 8, maxRows: 15 }" 
-                placeholder="在此粘贴需要处理的Markdown文本..."
-              ></el-input>
-            </el-form-item>
-          </el-form>
-          <el-button type="primary" @click="processText" class="process-btn">处理文本</el-button>
+      <div class="textarea-container">
+        <el-form>
+          <el-form-item label="输入文本">
+            <el-input 
+              type="textarea" 
+              v-model="inputText" 
+              :autosize="{ minRows: 6, maxRows: 12 }" 
+              placeholder="在此粘贴需要处理的Markdown文本..."
+            ></el-input>
+          </el-form-item>
+        </el-form>
+      </div>
+      
+      <div class="controls-container">
+        <div class="action-buttons">
+          <el-button type="primary" @click="processText">处理文本</el-button>
+          <el-button @click="resetText">重置</el-button>
+          <el-button @click="copyProcessedText" :disabled="!outputText">复制结果</el-button>
         </div>
-        
-        <div class="options-section">
-          <h3 class="options-title">处理选项</h3>
-          <div class="options-list">
-            <el-checkbox v-model="options.keepLists">保留列表 (- 和 1. 格式)</el-checkbox>
-            <el-checkbox v-model="options.stripBold">去除加粗 (**文本**)</el-checkbox>
-            <el-checkbox v-model="options.stripItalic">去除斜体 (*文本*)</el-checkbox>
-            <el-checkbox v-model="options.stripHeadings">去除标题 (# 标题)</el-checkbox>
-            <el-checkbox v-model="options.stripLinks">去除链接 ([文本](链接))</el-checkbox>
-            <el-checkbox v-model="options.stripCode">去除代码 (`代码`)</el-checkbox>
-            <el-checkbox v-model="options.stripStrikethrough">去除删除线 (~~文本~~)</el-checkbox>
-          </div>
+        <el-divider>处理选项</el-divider>
+        <div class="options-grid">
+          <el-checkbox v-model="options.stripBold">去除加粗 (**文本**)</el-checkbox>
+          <el-checkbox v-model="options.stripItalic">去除斜体 (*文本*)</el-checkbox>
+          <el-checkbox v-model="options.stripHeadings">去除标题 (# 标题)</el-checkbox>
+          <el-checkbox v-model="options.stripLinks">去除链接 ([文本](链接))</el-checkbox>
+          <el-checkbox v-model="options.stripCode">去除代码 (`代码`)</el-checkbox>
+          <el-checkbox v-model="options.stripStrikethrough">去除删除线 (~~文本~~)</el-checkbox>
+          <el-checkbox v-model="options.keepLists">保留列表 (- 和 1. 格式)</el-checkbox>
         </div>
-        
-        <div class="output-section">
-          <el-form>
-            <el-form-item label="处理结果">
-              <el-input 
-                type="textarea" 
-                v-model="outputText" 
-                :autosize="{ minRows: 8, maxRows: 15 }" 
-                readonly
-                placeholder="处理后的文本将显示在这里..."
-              ></el-input>
-            </el-form-item>
-          </el-form>
-          <el-button type="success" @click="copyProcessedText" :disabled="!outputText">复制结果</el-button>
-        </div>
+      </div>
+      
+      <div class="result-container">
+        <el-form>
+          <el-form-item label="处理结果">
+            <el-input 
+              type="textarea" 
+              v-model="outputText" 
+              :autosize="{ minRows: 6, maxRows: 12 }" 
+              readonly
+              placeholder="处理后的文本将显示在这里..."
+            ></el-input>
+          </el-form-item>
+        </el-form>
       </div>
     </div>
     
@@ -75,13 +76,13 @@ export default {
       inputText: '',
       outputText: '',
       options: {
-        keepLists: true,
         stripBold: true,
         stripItalic: true,
         stripHeadings: true,
         stripLinks: true,
         stripCode: true,
-        stripStrikethrough: true
+        stripStrikethrough: true,
+        keepLists: true
       },
       originalText: '',
     }
@@ -149,9 +150,16 @@ export default {
       }
       
       this.outputText = processedText;
-      
-      // 自动复制处理结果
-      this.copyProcessedText();
+    },
+    
+    resetText() {
+      if (this.originalText) {
+        this.inputText = this.originalText;
+        this.originalText = '';
+      } else {
+        this.inputText = '';
+      }
+      this.outputText = '';
     },
     
     copyProcessedText() {
@@ -189,68 +197,25 @@ export default {
 .tool-container {
   display: flex;
   flex-direction: column;
-  padding: 10px;
+  gap: 16px;
 }
 
-.content-wrapper {
+.options-grid {
   display: grid;
-  grid-template-columns: 1fr 200px 1fr;
-  gap: 20px;
-  align-items: start;
-}
-
-.input-section, .output-section {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.options-section {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: center;
-  border-left: 1px solid #eee;
-  border-right: 1px solid #eee;
-  padding: 0 15px;
-}
-
-.options-title {
-  text-align: center;
-  margin-bottom: 15px;
-  font-weight: bold;
-  color: #606266;
-}
-
-.options-list {
-  display: flex;
-  flex-direction: column;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 12px;
+  margin-bottom: 16px;
 }
 
-.process-btn, .output-section button {
-  align-self: flex-end;
-  margin-top: 8px;
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
 }
 
-@media (max-width: 1024px) {
-  .content-wrapper {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-  }
-  
-  .options-section {
-    border-left: none;
-    border-right: none;
-    border-top: 1px solid #eee;
-    border-bottom: 1px solid #eee;
-    padding: 15px 0;
-    margin: 15px 0;
-  }
-  
-  .options-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-direction: column;
   }
 }
 </style> 
