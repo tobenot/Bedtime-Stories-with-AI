@@ -29,7 +29,7 @@
         <el-button class="btn-small w-full mb-2" @click="openExternalLink('https://tobenot.top/Epitaph/')">
           <el-icon><Collection /></el-icon> 作者作品集（游戏/小说/动漫）
         </el-button>
-        <el-button class="btn-small w-full" @click="openExternalLink('https://www.xiaohongshu.com/user/profile/5c03942800000000050142ab')">
+        <el-button class="btn-small w-full" @click="openExternalLink('https://tobenot.top/Bedtime-Stories-with-AI-2/')">
           <el-icon><Promotion /></el-icon> 关注小红书，更新提示词工具
         </el-button>
       </div>
@@ -67,7 +67,7 @@
         <el-button class="btn-small w-full mb-2" @click="openExternalLink('https://tobenot.top/Epitaph/')">
           <el-icon><Collection /></el-icon> 作者作品集（游戏/小说/动漫）
         </el-button>
-        <el-button class="btn-small w-full" @click="openExternalLink('https://www.xiaohongshu.com/user/profile/5c03942800000000050142ab')">
+        <el-button class="btn-small w-full" @click="openExternalLink('https://tobenot.top/Bedtime-Stories-with-AI-2/')">
           <el-icon><Promotion /></el-icon> 小红书会更新提示词工具
         </el-button>
       </div>
@@ -456,7 +456,7 @@
             <a href="https://space.bilibili.com/23122362/" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
               <el-icon><VideoPlay /></el-icon> Bilibili
             </a>
-            <a href="https://www.xiaohongshu.com/user/profile/5c03942800000000050142ab" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
+            <a href="https://tobenot.top/Bedtime-Stories-with-AI-2/" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
               <el-icon><Picture /></el-icon> 小红书
             </a>
             <a href="https://tobenot.top/Epitaph/experience" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
@@ -485,7 +485,7 @@
             <a href="https://space.bilibili.com/14097567" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
               <el-icon><VideoPlay /></el-icon> Bilibili
             </a>
-            <a href="https://www.xiaohongshu.com/user/profile/5abc6f17e8ac2b109179dfdf" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
+            <a href="https://tobenot.top/Bedtime-Stories-with-AI-2/" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">
               <el-icon><Picture /></el-icon> 小红书
             </a>
             <a href="https://x.com/AlchainHust" target="_blank" class="social-link flex items-center gap-2 p-2 bg-gray-100 rounded hover:bg-gray-200">

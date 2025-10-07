@@ -85,7 +85,7 @@ AI进化论-花生
 
 ### 关注作者
 - Bilibili: [丶青萝卜](https://space.bilibili.com/23122362/)
-- 小红书: [丶青萝卜](https://www.xiaohongshu.com/user/profile/5c03942800000000050142ab)
+- 小红书: [丶青萝卜](https://tobenot.top/Bedtime-Stories-with-AI-2/)
 
 ### 作者个人主页
 [作家之屋](https://tobenot.top/)
@@ -103,7 +103,7 @@ AI进化论-花生
 ### 关注原作者
 - YouTube: [AI进化论-花生](https://www.youtube.com/@alchain)
 - Bilibili: [AI进化论-花生](https://space.bilibili.com/14097567)
-- 小红书: [AI进化论-花生](https://www.xiaohongshu.com/user/profile/5abc6f17e8ac2b109179dfdf)
+- 小红书: [AI进化论-花生](https://tobenot.top/Bedtime-Stories-with-AI-2/)
 - X(Twitter): [@huasheng_ai](https://x.com/AlchainHust)
 - 微信公众号: 花叔
 
