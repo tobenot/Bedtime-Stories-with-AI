@@ -574,10 +574,6 @@ export default {
       messages: [],
       inputMessage: '',
       model: localStorage.getItem('model') || 'deepseek-ai/DeepSeek-R1',
-      models: [
-        'deepseek-ai/DeepSeek-R1',
-        'deepseek-ai/DeepSeek-V3'
-      ],
       temperature: localStorage.getItem('temperature')
         ? parseFloat(localStorage.getItem('temperature'))
         : 0.7,
@@ -618,6 +614,45 @@ export default {
   computed: {
     currentChat() {
       return this.chatHistory.find(chat => chat.id === this.currentChatId)
+    },
+    models() {
+      const u = this.apiUrl || '';
+      if (u.includes('openrouter.ai')) {
+        return [
+          'google/gemini-2.5-flash-lite',
+          'google/gemini-2.5-flash',
+          'google/gemini-2.5-pro',
+          'google/gemini-2.5-flash-image-preview',
+          'google/gemini-2.5-flash-image',
+          'google/gemini-3-pro-image-preview',
+          'google/gemini-3-pro-preview',
+          'google/gemini-3-flash-preview',
+          'anthropic/claude-sonnet-4',
+          'anthropic/claude-sonnet-4.5',
+          'anthropic/claude-3.5-sonnet',
+          'anthropic/claude-opus-4.1',
+          'anthropic/claude-opus-4.5',
+          'openai/gpt-4.1-mini',
+          'openai/gpt-4o-mini',
+          'openai/gpt-5',
+          'openai/gpt-5-mini',
+          'openai/gpt-5.1',
+          'openai/gpt-5.1-codex',
+          'x-ai/grok-code-fast-1',
+          'x-ai/grok-4.1-fast:free',
+          'z-ai/glm-4.6',
+          'z-ai/glm-4.7',
+          'deepseek/deepseek-chat-v3.1:free',
+          'deepseek/deepseek-chat-v3-0324',
+          'deepseek/deepseek-r1-0528:free',
+          'deepseek/deepseek-v3.2',
+          'deepseek/deepseek-v3.2-speciale'
+        ];
+      }
+      return [
+        'deepseek-ai/DeepSeek-R1',
+        'deepseek-ai/DeepSeek-V3'
+      ];
     },
     apiUrlHint() {
       if (this.apiUrl === 'https://api.siliconflow.cn/v1/chat/completions') {
