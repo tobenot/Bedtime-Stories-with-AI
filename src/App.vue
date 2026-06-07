@@ -414,6 +414,10 @@
             <el-button size="small" @click="exportChatArchive">导出存档</el-button>
             <el-button size="small" type="primary" @click="importChatArchive('merge')">导入存档（合并）</el-button>
             <el-button size="small" type="danger" @click="importChatArchive('overwrite')">导入存档（覆盖）</el-button>
+            <el-button size="small" type="warning" @click="forceMigrateLegacyData">从旧站拉取存档</el-button>
+          </div>
+          <div class="mt-1 text-gray-600 text-sm">
+            「从旧站拉取存档」从 {{ legacySitePath }} 读取浏览器内保存的对话与设置（设置只填空，对话合并）。
           </div>
         </el-form-item>
         <!-- 结束对话存档功能区 -->
@@ -561,6 +565,11 @@ import { MAX_TITLE_LENGTH, COPY_SUFFIX } from '@/config/constants.js';
 import confirmUseScript from './utils/scriptPreview.js';
 import { callAiModel } from '@/utils/aiService';
 
+const MIGRATION_FLAG_KEY = 'bs1_migration_done';
+const MIGRATION_ORIGIN = 'https://tobenot.top';
+const MIGRATION_BRIDGE_URL = 'https://tobenot.top/migration-bs1/recover-data.html';
+const LEGACY_SITE_PATH = 'tobenot.top/Bedtime-Stories-with-AI';
+
 export default {
   components: {
     ChatItem,
@@ -613,6 +622,7 @@ export default {
         content: ''
       },
       showTxtNovelExporter: false,
+      legacySitePath: LEGACY_SITE_PATH,
     }
   },
   computed: {
@@ -660,6 +670,7 @@ export default {
     }
   },
   mounted() {
+    this.checkAndMigrateLegacyData();
     let container = this.$refs.messageContainer;
     if (container && container.$el) {
       container = container.$el;
@@ -683,6 +694,108 @@ export default {
     }
   },
   methods: {
+    checkAndMigrateLegacyData() {
+      if (localStorage.getItem(MIGRATION_FLAG_KEY)) {
+        return;
+      }
+
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = MIGRATION_BRIDGE_URL;
+
+      const migrationListener = (event) => {
+        if (event.origin !== MIGRATION_ORIGIN) return;
+        if (event.source !== iframe.contentWindow) return;
+
+        const data = event.data;
+        if (data && data.type === 'bs1_migration_empty') {
+          localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
+          window.removeEventListener('message', migrationListener);
+          console.log('[Migration] 旧站无数据');
+        } else if (data && data.type === 'bs1_migration_data') {
+          console.log('[Migration] 接收到旧站全量数据，准备导入...', data.payload);
+          
+          const { snapshot, settingsSnapshot } = data.payload;
+          this.importLegacyData(snapshot, settingsSnapshot);
+
+          localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
+          window.removeEventListener('message', migrationListener);
+          this.$message({ message: '旧站数据拉取并合并成功', type: 'success', duration: 3000 });
+        } else if (data && data.type === 'bs1_migration_error') {
+          console.error('[Migration] 旧站读取失败:', data.error);
+          window.removeEventListener('message', migrationListener);
+          this.$message({ message: '旧站数据拉取失败: ' + data.error, type: 'error', duration: 3000 });
+        }
+      };
+
+      window.addEventListener('message', migrationListener);
+      document.body.appendChild(iframe);
+    },
+    importLegacyData(snapshot, settingsSnapshot) {
+      const ALLOWED_SETTING_KEYS = [
+        'deepseek_api_key',
+        'model',
+        'temperature',
+        'default_hide_reasoning',
+        'auto_collapse_reasoning',
+        'api_url'
+      ];
+
+      if (settingsSnapshot && settingsSnapshot.localStorage) {
+        for (const key of ALLOWED_SETTING_KEYS) {
+          const value = settingsSnapshot.localStorage[key];
+          if (typeof value === 'string' && localStorage.getItem(key) === null) {
+            localStorage.setItem(key, value);
+            if (key === 'deepseek_api_key') this.apiKey = value;
+            if (key === 'model') this.model = value;
+            if (key === 'temperature') this.temperature = parseFloat(value);
+            if (key === 'default_hide_reasoning') this.defaultHideReasoning = JSON.parse(value);
+            if (key === 'auto_collapse_reasoning') this.autoCollapseReasoning = JSON.parse(value);
+            if (key === 'api_url') this.apiUrl = value;
+          }
+        }
+      }
+
+      let chatData = null;
+      if (Array.isArray(snapshot)) {
+        chatData = snapshot;
+      } else if (snapshot && Array.isArray(snapshot.chatHistory)) {
+        chatData = snapshot.chatHistory;
+      } else if (settingsSnapshot && settingsSnapshot.localStorage && settingsSnapshot.localStorage.chat_history) {
+        try {
+          chatData = JSON.parse(settingsSnapshot.localStorage.chat_history);
+        } catch (e) {
+          console.error('[Migration] 解析旧站 chat_history 失败:', e);
+        }
+      }
+
+      if (chatData && Array.isArray(chatData) && chatData.length > 0) {
+        // 过滤掉当前已有的对话（根据 id 去重），避免重复合并
+        const existingIds = new Set(this.chatHistory.map(c => c.id));
+        const newChats = chatData.filter(c => !existingIds.has(c.id));
+        
+        if (newChats.length > 0) {
+          this.chatHistory = newChats.concat(this.chatHistory);
+          if (!this.currentChatId && this.chatHistory.length > 0) {
+            this.currentChatId = this.chatHistory[0].id;
+          }
+          this.saveChatHistory();
+          console.log(`[Migration] 成功合并了 ${newChats.length} 个对话`);
+        } else {
+          console.log('[Migration] 没有新的对话需要合并');
+        }
+      }
+    },
+    forceMigrateLegacyData() {
+      this.$confirm(`此操作将从旧站（${LEGACY_SITE_PATH}）拉取数据，设置将只填空，对话将合并。确定继续吗？`, '确认拉取', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        localStorage.removeItem('bs1_migration_done');
+        this.checkAndMigrateLegacyData();
+      }).catch(() => {});
+    },
     saveApiKey() {
       localStorage.setItem('deepseek_api_key', this.apiKey)
     },
