@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
 export default defineConfig({
-  base: '/Bedtime-Stories-with-AI/',
+  base: '/',
   plugins: [vue()],
   server: {
     port: 3000

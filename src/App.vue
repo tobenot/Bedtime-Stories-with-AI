@@ -26,10 +26,10 @@
         <el-button class="btn-small w-full mb-2" @click="openExternalLink('https://tobenot.itch.io/beyond-books')">
           <el-icon><VideoPlay /></el-icon> AI剧本杀游戏（AI NPC和主持人）
         </el-button>
-        <el-button class="btn-small w-full mb-2" @click="openExternalLink('https://tobenot.top/Epitaph/')">
+        <el-button class="btn-small w-full mb-2" @click="openExternalLink('https://e.tobenot.top/')">
           <el-icon><Collection /></el-icon> 作者作品集（游戏/小说/动漫）
         </el-button>
-        <el-button class="btn-small w-full" @click="openExternalLink('https://tobenot.top/Bedtime-Stories-with-AI-2/')">
+        <el-button class="btn-small w-full" @click="openExternalLink('https://ai.tobenot.top/')">
           <el-icon><Promotion /></el-icon> 访问新版（不稳定）
         </el-button>
       </div>
@@ -64,10 +64,10 @@
         <el-button class="btn-small w-full mb-2" @click="openExternalLink('https://tobenot.itch.io/beyond-books')">
           <el-icon><VideoPlay /></el-icon> AI剧本杀游戏（AI NPC和主持人）
         </el-button>
-        <el-button class="btn-small w-full mb-2" @click="openExternalLink('https://tobenot.top/Epitaph/')">
+        <el-button class="btn-small w-full mb-2" @click="openExternalLink('https://e.tobenot.top/')">
           <el-icon><Collection /></el-icon> 作者作品集（游戏/小说/动漫）
         </el-button>
-        <el-button class="btn-small w-full" @click="openExternalLink('https://tobenot.top/Bedtime-Stories-with-AI-2/')">
+        <el-button class="btn-small w-full" @click="openExternalLink('https://ai.tobenot.top/')">
           <el-icon><Promotion /></el-icon> 访问新版（不稳定）
         </el-button>
       </div>
